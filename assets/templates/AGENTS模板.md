@@ -5,19 +5,47 @@
 ## 需求流程
 
 - 需求入口是 Asana。
-- 开发前必须有 PRD 或 OpenSpec proposal。
-- 需求不清楚时先澄清，不写代码。
+- 每个需求总是先生成 PRD；信息不足时输出待确认问题，不写代码。
+- PRD 未确认，不创建正式 OpenSpec change。
 - 实现偏差时先更新 PRD/OpenSpec，再改代码。
 - 每个需求必须记录 OpenSpec change-id。
 - PR 前必须给出验证结果、风险、回滚方案。
 
+## 小需求 / 大重构分流
+
+满足任一条件即视为大重构，切换到 `large-refactor-workflow`：
+
+- 跨 3 个以上模块。
+- 影响多层：Controller / Service / Mapper。
+- 改核心模型、核心表、核心接口。
+- 预计超过 2 天。
+- 关键词包含：重构、治理、解耦、升级、统一、替换。
+
+## 大重构流程
+
+- 大重构不允许用一个巨大 OpenSpec change 承载全部变更。
+- 命中跨模块、核心模型、核心表、核心接口、预计超过 2 天时，先走 `large-refactor-workflow`。
+- 先建 Asana Epic。
+- 先用 CodeGraph 做 Discovery。
+- 先写 `docs/refactor/<重构名>/重构RFC.md`。
+- 先补测试基线，再改结构。
+- 按 phase 拆多个 OpenSpec changes。
+- 每个 phase 必须可独立 Review、合并、回滚。
+- 开发可并行，合并必须串行。
+- phase-n 必须在 phase-(n-1) 合并后的基线上测试。
+- 回滚方案必须在测试环境验证，或说明无法验证原因。
+- PR 必须小范围串行推进。
+
 ## CodeGraph 代码图谱规则
 
-- 如果项目存在 `.codegraph/`，陌生代码、跨模块需求、接口/Service/Mapper 改动前先查 CodeGraph。
-- 优先查 `context`、`search`、`callers`、`callees`、`impact`。
+- 陌生代码、跨模块需求、接口/Service/Mapper 改动前先定位影响面。
+- 优先使用 CodeGraph。
+- 优先查 `codegraph_context`、`codegraph_trace`、`codegraph_impact`。
 - 修改前查入口、调用链、影响面。
 - 修改后 PR 前复查 impact。
-- CodeGraph 找不到、过期或信息不足时，再用 `rg` / 文件读取兜底。
+- CodeGraph 找不到、过期或信息不足时，再用 `rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取手动追踪函数名、类名、接口路径、SQL id。
+- 手动追踪必须记录“未用 CodeGraph，可能遗漏”的风险。
+- 仍不确定时，PR 标记 `[NEEDS-MANUAL-REVIEW]`，要求资深开发者复查影响面。
 - 小改动且文件明确时可以少查，但最终说明必须能解释影响面。
 
 ## AI 写代码纪律
@@ -56,6 +84,7 @@
 
 ## 测试规则
 
+- Plan Review 阶段先确认测试策略和回滚方案。
 - 行为变更必须有测试，或说明不能自动化原因。
 - Bugfix 必须有回归测试，先复现 bug 再修。
 - Service 逻辑优先 JUnit 5 + Mockito。
@@ -94,6 +123,25 @@
 - 只做最小改动，不做架构重写。
 - 修完必须重新运行同一构建命令验证。
 - 不通过跳过测试、删除测试、压制 warning 来伪造成功。
+
+## 工具失败处理
+
+- OpenSpec 命令失败：停止实现，记录命令、错误、当前 change-id，先修 OpenSpec 状态。
+- CodeGraph 不可用：降级到 `rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取手动追踪，并在 PR 中说明。
+- MySQL MCP 失败：不绕过安全规则；改为生成 SQL 和人工执行步骤。
+- 测试命令失败：优先修测试或代码；不能用跳过测试替代。
+
+## 风险升级
+
+发现以下情况立即暂停并升级：
+
+- 影响面超出预期，例如 CodeGraph callers > 10。
+- 发现核心事务边界变更。
+- 需要数据迁移，例如影响行数 > 1000。
+- 需要停机窗口。
+- 发现安全漏洞或权限绕过。
+
+升级动作：更新 OpenSpec `design.md` 风险部分，在 Asana 评论 @验收人，评估是否切换到大重构流程，并暂停实现等待确认。
 
 ## Review 规则
 

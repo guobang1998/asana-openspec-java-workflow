@@ -3,6 +3,8 @@
 ## 需求来源
 
 - Asana：
+- Asana Epic：
+- 重构 RFC：
 - OpenSpec change-id：
 - PRD：
 
@@ -14,7 +16,9 @@
 
 - [ ] 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。
 - [ ] 没有未要求功能、无关重构或过度抽象。
-- [ ] 项目有 `.codegraph/` 时，已复查 CodeGraph impact。
+- [ ] 如果是大重构，本 PR 只覆盖一个 phase 或 phase 内一个子任务。
+- [ ] 已说明影响面定位方式：CodeGraph / 手动追踪 / 人工 Review。
+- [ ] 已复查影响面或说明无法复查原因。
 - [ ] 已按 Java 编码规范检查命名、异常、日志、MyBatis、测试。
 - [ ] 已按 Spring Boot 服务规则检查 Controller/Service/Mapper 分层。
 - [ ] 已按 Java 测试策略检查单测、集成测试、手动验证和未覆盖项。
@@ -37,6 +41,7 @@
 - 单测：
 - 集成测试：
 - 手动验证：
+- 回滚验证：
 - 未覆盖项：
 - 安全检查：
 - CodeGraph impact：
@@ -57,6 +62,15 @@
 - 是否涉及 DDL：
 - 锁表风险：
 - 是否已确认：
+
+## 流程复盘（完成后填写，见 assets/templates/流程复盘记录模板.md）
+
+- 预估耗时：
+- 实际耗时：
+- Review 轮次：
+- 测试发现 bug 数：
+- 是否发生回退：
+- 回退原因：
 
 ## Review 关注点
 

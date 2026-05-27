@@ -7,6 +7,13 @@ description: Use when adding, changing, reviewing, or preparing PRs for Java/Spr
 
 Java 测试策略。目标：PR 前测试能对应需求验收标准，不用一句“已测试”糊过去。
 
+## 使用时机
+
+测试策略分两次使用：
+
+1. Plan Review 阶段：先确定要写哪些单测、集成测试、手动验证和回滚验证。
+2. 实现后：检查这些测试是否真的完成，并记录未覆盖项。
+
 ## 基本规则
 
 - 行为变更必须有测试，或说明不能自动化原因。
@@ -115,9 +122,11 @@ Java 测试策略。目标：PR 前测试能对应需求验收标准，不用一
 
 ```text
 测试结论：PASS / NEED_TEST / MANUAL_ONLY / BLOCKED
+Plan Review 测试策略：
 必须新增测试：
 建议新增测试：
 可手动验证：
+回滚验证：
 测试命令：
 未覆盖风险：
 ```

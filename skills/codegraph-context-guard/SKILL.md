@@ -45,7 +45,29 @@ node      -> 看单个 symbol 详情
 files     -> 看目录/文件结构
 ```
 
-避免上来全仓库 `grep + read`。CodeGraph 找不到、过期、信息不足时，再用 `rg`、`Get-ChildItem`、文件读取兜底。
+避免上来全仓库 `grep + read`。
+
+## CodeGraph 降级策略
+
+当没有 `.codegraph/`、索引过期、工具不可用或结果明显不足时，按顺序降级：
+
+1. CodeGraph：`.codegraph/` 存在且索引健康。
+   - `codegraph_context`：确认入口、关键类、影响面。
+   - `codegraph_trace`：确认调用链。
+   - `codegraph_impact`：确认改动影响。
+2. 手动追踪：CodeGraph 不可用时。
+   - 用 `rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) 搜索函数名、类名、接口路径、SQL id。
+   - 逐文件读取入口、调用方、被调用方。
+   - 记录“未用 CodeGraph，可能遗漏”的风险。
+3. 人工 Review：代码量大或影响面仍不确定时。
+   - PR 标记 `[NEEDS-MANUAL-REVIEW]`。
+   - 要求资深开发者复查影响面。
+
+降级时必须说明：
+
+- 为什么降级。
+- 用了什么替代方式。
+- 仍然不确定的影响面。
 
 ## OpenSpec 前
 
@@ -93,4 +115,5 @@ PR 前复查：
 - 查到的入口。
 - 关键调用链。
 - 影响面。
+- 使用的定位方式：CodeGraph / 手动追踪 / 人工 Review。
 - 仍需人工确认的点。

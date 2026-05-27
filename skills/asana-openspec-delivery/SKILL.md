@@ -1,6 +1,6 @@
 ---
 name: asana-openspec-delivery
-description: Use when driving a requirement through the team's Asana + OpenSpec + Codex workflow: Asana intake, PRD, OpenSpec change, plan review, Java implementation, verification, human review, PR, and OpenSpec archive.
+description: Use when driving a requirement through the team's Asana + OpenSpec + Codex workflow: Asana intake, PRD, small-change vs large-refactor decision, OpenSpec change, plan review, Java implementation, verification, human review, PR, and OpenSpec archive.
 ---
 
 # Asana OpenSpec Delivery
@@ -11,12 +11,14 @@ description: Use when driving a requirement through the team's Asana + OpenSpec 
 
 ```text
 Asana 新需求
--> 需求澄清
+-> PRD Writer
 -> PRD Review
+-> 小需求 / 大重构分流
 -> OpenSpec Planning
+-> Plan Review
 -> 开发中
 -> 测试迭代
--> 人工 Review
+-> Review Gates
 -> 待 PR
 -> 合并
 -> OpenSpec archive
@@ -25,46 +27,103 @@ Asana 新需求
 ## 执行流程
 
 1. 读取 Asana 需求，确认标题、背景、目标、验收人、优先级、影响面。
-2. 需求不完整时，调用 `prd-writer` 先补 PRD。
-3. 需求确认后，创建或要求创建 OpenSpec change。
-4. 如果项目存在 `.codegraph/`，调用 `codegraph-context-guard` 定位入口、调用链和影响面。
-5. 检查 OpenSpec 文件：
+2. 总是先调用 `prd-writer`：
+   - 信息足够：输出完整 PRD。
+   - 信息不足：输出待确认问题列表，回 Asana 评论，不写代码。
+3. PRD 确认后，判断是小需求还是大重构。
+4. 满足任一条件即视为大重构：
+   - 跨 3 个以上模块。
+   - 影响多层：Controller / Service / Mapper。
+   - 改核心模型、核心表、核心接口。
+   - 预计超过 2 天。
+   - 需求关键词包含：重构、治理、解耦、升级、统一、替换。
+5. 如果是大重构，调用 `large-refactor-workflow`，生成 RFC、测试基线和 phase 拆分。
+6. 如果是小需求，PRD 确认后创建 OpenSpec change。
+7. 定位影响面：
+   - 优先：`codegraph-context-guard`，查入口、调用链、callers/callees、impact。
+   - 降级：`rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取，手动追踪调用链。
+   - 最低：依赖人工 Code Review 明确影响面。
+8. 检查 OpenSpec 文件：
    - `proposal.md`
    - `design.md`
    - `tasks.md`
    - `specs/`
-6. 实现前调用 `coding-discipline`，确认假设、范围、不做内容、验证方式。
-7. 实现前做 Plan Review，确认任务拆分、风险、测试路径。
-8. 实现时按 `java-coding-standard` 和 `springboot-service-patterns` 推进。
-9. 涉及接口、权限、输入、密钥、敏感数据时，调用 `springboot-security-review`。
-10. 构建失败时调用 `java-build-fix`，只做最小修复。
-11. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
-12. 实现后调用 `java-test-strategy`，确认单测、集成测试、手动验证要求。
-13. 实现后调用 `codegraph-context-guard` 复查 impact，再调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
-14. PR 描述必须包含 Asana 链接、OpenSpec change-id、测试结果、风险说明。
-15. 合并后执行 OpenSpec verify/archive，并更新 Asana 状态。
+9. 实现前做 Plan Review，确认：
+   - 任务拆分。
+   - 风险点。
+   - 测试策略：单测 / 集成测试 / 手动验证。
+   - 回滚方案：涉及 DB、核心逻辑、权限、状态流转时必须写清。
+10. 实现前调用 `coding-discipline`，确认假设、范围、不做内容、验证方式。
+11. 实现时按 `java-coding-standard` 和 `springboot-service-patterns` 推进。
+12. 涉及接口、权限、输入、密钥、敏感数据时，调用 `springboot-security-review`。
+13. 构建失败时调用 `java-build-fix`，只做最小修复。
+14. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
+15. 实现后再次调用 `java-test-strategy`，按第 9 步测试策略确认单测、集成测试、手动验证是否完成。
+16. 实现后调用 `codegraph-context-guard` 复查 impact，再调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
+17. PR 描述必须包含 Asana 链接、OpenSpec change-id、测试结果、风险说明、回滚方案。
+18. 合并后执行 OpenSpec verify/archive，并更新 Asana 状态。
+19. 完成后记录流程改进数据。
 
 ## 决策规则
 
 - Asana 是需求入口，不承载完整实现细节。
 - PRD 是业务合同，OpenSpec 是变更账本。
+- PRD 未确认，不创建正式 OpenSpec change。
 - OpenSpec 不清楚时，不进入实现。
+- 大重构不用单个 OpenSpec change 承载全部变更。
 - Review 不满意时，按问题类型回退：
   - 业务理解错：回 PRD。
   - 方案设计错：回 OpenSpec design。
   - 实现 bug：回开发中。
-  - 测试不足：回 PR quality gate。
+  - 测试不足：回 `java-test-strategy` 补测试。
 
-## 推荐 OpenSpec 命令
+## OpenSpec 命令使用时机
 
-```text
-/opsx:new <change-id>
-/opsx:continue
-/opsx:ff
-/opsx:apply
-/opsx:verify
-/opsx:archive
-```
+| 阶段 | 命令 | 说明 |
+|---|---|---|
+| PRD 确认后 | `/opsx:new <change-id>` | 创建新 change |
+| 编辑 OpenSpec | `/opsx:continue` | 继续编辑当前 change |
+| 快速填充 | `/opsx:ff` | AI 生成 proposal/design/tasks |
+| 开始实现 | `/opsx:apply` | 应用 change 到代码 |
+| PR 合并后 | `/opsx:verify` | 验证实现完整性 |
+| 验证通过 | `/opsx:archive` | 归档并关闭 change |
+
+## 工具失败处理
+
+工具失败时不要绕过流程。按仓库根目录 `工具失败处理.md` 执行：
+
+- OpenSpec 失败：停止实现，记录命令、错误和 change-id，修复后重跑。
+- CodeGraph 失败：降级到 `rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取，并在 PR 里说明定位方式。
+- MySQL MCP 失败：不绕过 `mysql-db-guard`，输出 SQL、影响面和回滚方案，改人工执行。
+- 构建/测试失败：调用 `java-build-fix`，不能跳过测试伪造通过。
+- Asana / GitHub Connector 失败：手动补齐链接和上下文，连接恢复后补回状态。
+
+## 风险升级规则
+
+发现以下情况立即暂停并升级：
+
+- 影响面超出预期，例如 CodeGraph callers > 10。
+- 发现核心事务边界变更。
+- 需要数据迁移，例如影响行数 > 1000。
+- 需要停机窗口。
+- 发现安全漏洞或权限绕过。
+
+升级动作：
+
+1. 更新 OpenSpec `design.md` 风险部分。
+2. 在 Asana 评论 @验收人。
+3. 评估是否需要切换到 `large-refactor-workflow`。
+4. 暂停实现，等待确认；确认后再继续原流程、补充设计后继续，或切换大重构流程。
+
+## 完成后记录
+
+用于流程改进，不做个人 KPI。
+
+- 实际耗时 vs 预估。
+- Review 轮次和主要问题。
+- 测试发现的 bug 数。
+- 是否发生回退，原因是什么。
+- CodeGraph 是否准确定位影响面。
 
 ## 完成标准
 
@@ -76,5 +135,7 @@ Asana 新需求
 - 涉及 MySQL 时，已记录 SQL、影响行数、确认结果和回滚方案。
 - 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。
 - 涉及安全敏感点时，已完成 Spring Boot Security Review。
-- 项目有 `.codegraph/` 时，已给出入口、调用链、影响面和 impact 复查结果。
+- 已给出入口、调用链、影响面；没有 CodeGraph 时，说明降级追踪方式。
 - 行为变更已有单测/集成测试，或明确说明只能手动验证的原因和证据。
+- 大重构已拆为 RFC + 多个 OpenSpec changes + 小 PR，不用单个 change 吃全部。
+- 已记录完成后改进数据。
