@@ -17,6 +17,7 @@
 ```text
 Asana 新需求
 -> PRD md
+-> OpenSpec 既有规格 / active changes 检查
 -> OpenSpec change
 -> CodeGraph 定位影响面
 -> Codex 实现
@@ -172,6 +173,8 @@ assets/templates/
 
 - 需求不清楚，不写代码。
 - PRD 未确认，不进入实现。
+- 创建或更新 OpenSpec change 前，先查既有 specs、active changes、历史 PRD/Asana，确认不破坏旧验收标准。
+- `design.md` 必须写明本次变更与既有规格/历史需求的关系。
 - 实现偏差时，先改 PRD/OpenSpec，再改代码。
 - 每个代码改动必须对应 PRD、OpenSpec 或 `tasks.md`。
 - 行为变更必须有测试，或说明不能自动化原因。

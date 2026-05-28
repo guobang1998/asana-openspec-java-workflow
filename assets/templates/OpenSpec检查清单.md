@@ -5,6 +5,9 @@
 - [ ] Asana 需求已确认。
 - [ ] PRD 已有背景、目标、验收标准。
 - [ ] PRD 信息不足时，已输出待确认问题并回 Asana 评论。
+- [ ] 已检查相关 `openspec/specs/*`，确认当前系统规格和旧验收标准。
+- [ ] 已检查 `openspec/changes/*` active changes，确认没有并行变更冲突。
+- [ ] 已检查相关历史 PRD / Asana / archived change，确认本次不是孤立改动。
 - [ ] 影响面已确认。
 - [ ] 需求边界已写明 `不做什么`。
 - [ ] 已判断不是大重构；如果是大重构，已切到 `large-refactor-workflow`。
@@ -16,6 +19,7 @@
 
 - [ ] `proposal.md` 说明为什么改、改什么。
 - [ ] `design.md` 说明方案、风险、回滚。
+- [ ] `design.md` 已写明“与既有规格/历史需求的关系”。
 - [ ] `tasks.md` 可执行、可勾选。
 - [ ] `specs/` 写明行为变化和验收标准。
 - [ ] Plan Review 已确认任务拆分、风险点、测试策略和回滚方案。

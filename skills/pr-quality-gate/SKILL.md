@@ -14,6 +14,8 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 - Asana 任务存在且状态正确。
 - PRD 已确认。
 - OpenSpec change-id 已记录。
+- 已检查相关既有 specs、active changes、历史 PRD/Asana，且 `design.md` 写明关系。
+- 没有未说明的旧验收标准破坏；如有破坏，已记录迁移、回滚和确认。
 - `tasks.md` 已完成或明确剩余项。
 - 偏差已回写 PRD/OpenSpec。
 - 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。

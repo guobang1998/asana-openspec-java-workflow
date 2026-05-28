@@ -7,6 +7,9 @@
 - 需求入口是 Asana。
 - 每个需求总是先生成 PRD；信息不足时输出待确认问题，不写代码。
 - PRD 未确认，不创建正式 OpenSpec change。
+- 创建或更新 OpenSpec change 前，必须检查相关 `openspec/specs/*`、`openspec/changes/*` active changes、历史 PRD / Asana / archived change。
+- `design.md` 必须写明本次变更与既有规格/历史需求的关系：兼容、扩展、替换或冲突处理。
+- 如果会破坏旧验收标准，必须写明迁移策略、回滚方案和验收人确认。
 - 实现偏差时先更新 PRD/OpenSpec，再改代码。
 - 每个需求必须记录 OpenSpec change-id。
 - PR 前必须给出验证结果、风险、回滚方案。

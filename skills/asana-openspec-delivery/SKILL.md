@@ -38,7 +38,11 @@ Asana 新需求
    - 预计超过 2 天。
    - 需求关键词包含：重构、治理、解耦、升级、统一、替换。
 5. 如果是大重构，调用 `large-refactor-workflow`，生成 RFC、测试基线和 phase 拆分。
-6. 如果是小需求，PRD 确认后创建 OpenSpec change。
+6. 如果是小需求，PRD 确认后先做 OpenSpec 既有规格检查，再创建 OpenSpec change：
+   - 查相关 `openspec/specs/*`，确认已归档需求形成的当前系统规格。
+   - 查 `openspec/changes/*` active changes，确认是否有并行变更冲突。
+   - 查相关历史 PRD、Asana 链接或 archived change，确认旧验收标准是否会被破坏。
+   - 在 `design.md` 写清“与既有规格/历史需求的关系”：兼容、扩展、替换或冲突处理。
 7. 定位影响面：
    - 优先：`codegraph-context-guard`，查入口、调用链、callers/callees、impact。
    - 降级：`rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取，手动追踪调用链。
@@ -76,6 +80,31 @@ Asana 新需求
   - 方案设计错：回 OpenSpec design。
   - 实现 bug：回开发中。
   - 测试不足：回 `java-test-strategy` 补测试。
+
+## OpenSpec 既有规格检查
+
+每次创建或更新 change 前，都要把新需求放回现有规格里看，而不是孤立看当前 Asana。
+
+必须确认：
+
+- 相关 `openspec/specs/*` 中是否已有行为、接口、字段、权限、状态流转或错误码约束。
+- `openspec/changes/*` 中是否有 active change 修改同一 capability、接口、表、Service 或 Mapper。
+- 历史 PRD、Asana、archived change 是否包含仍有效的验收标准。
+- 本次 change 是兼容扩展、行为替换、旧能力下线，还是修正历史规格错误。
+- 如需破坏旧行为，必须在 `design.md` 写明原因、迁移策略、回滚方案和验收人确认。
+
+输出到 `design.md`：
+
+```md
+## 与既有规格/历史需求的关系
+
+- 相关现有 specs：
+- 相关 active changes：
+- 相关历史 PRD / Asana / archived change：
+- 本次变更关系：兼容 / 扩展 / 替换 / 冲突修正
+- 可能破坏的旧验收标准：
+- 处理方式：
+```
 
 ## OpenSpec 命令使用时机
 
@@ -129,6 +158,7 @@ Asana 新需求
 
 - Asana 状态已更新。
 - PRD 已确认。
+- 已检查相关既有 specs、active changes 和历史 PRD/Asana，并在 `design.md` 记录关系。
 - OpenSpec change 已 verify/archive。
 - PR 已合并或给出阻塞原因。
 - 测试、Review、风险记录完整。
