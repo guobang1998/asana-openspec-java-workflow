@@ -47,6 +47,28 @@ files     -> 看目录/文件结构
 
 避免上来全仓库 `grep + read`。
 
+## 主动更新与同步确认
+
+AI 不等用户手动提醒。项目存在 `.codegraph/` 时，涉及 Java/Spring/MyBatis 行为变更、审查后准备 PR、或用户说“下一步 / 开始 PR / 生成 PR 描述”时，必须主动确认 CodeGraph 可用性和索引状态。
+
+执行顺序：
+
+```text
+确认 .codegraph/ 存在
+-> 检查 CodeGraph server / MCP 是否可用
+-> 检查 codegraph_status 或工具返回的 stale / pending 信息
+-> 如果有 pending sync，等待短暂同步后复查
+-> 如果仍未同步，说明降级原因并读真实文件兜底
+-> 生成 CodeGraph impact 影响面证据
+```
+
+注意：
+
+- CodeGraph 通常由 watcher 增量更新，AI 的责任是主动确认同步完成，不是假装已更新。
+- 如果工具提供 `Pending sync` 或 staleness banner，不能用旧索引做最终结论。
+- 已经改完代码但改前未查时，补做“改后影响面证据”，不要说等价于完整改前评估。
+- 如果 CodeGraph 不可用，必须写明“未用 CodeGraph，已手动追踪，仍可能遗漏”的风险。
+
 ## CodeGraph 降级策略
 
 当没有 `.codegraph/`、索引过期、工具不可用或结果明显不足时，按顺序降级：
@@ -95,6 +117,7 @@ files     -> 看目录/文件结构
 
 PR 前复查：
 
+- 主动检查 CodeGraph 索引状态，确认没有 pending sync 或 stale index。
 - 本次改动影响了哪些 callers/callees。
 - 是否有遗漏调用路径。
 - 是否需要补测试。

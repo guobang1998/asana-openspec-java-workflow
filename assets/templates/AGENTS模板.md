@@ -16,7 +16,7 @@
 
 ## 小需求 / 大重构分流
 
-满足任一条件即视为大重构，切换到 `large-refactor-workflow`：
+满足任一条件即视为大重构候选，先切换到 `large-refactor-workflow` 做评估，不直接默认启用多 agent：
 
 - 跨 3 个以上模块。
 - 影响多层：Controller / Service / Mapper。
@@ -33,11 +33,32 @@
 - 先写 `docs/refactor/<重构名>/重构RFC.md`。
 - 先补测试基线，再改结构。
 - 按 phase 拆多个 OpenSpec changes。
+- 必须询问用户是否启用多 agent 协作。
+- 用户确认启用后，必须再确认 worker 数量、角色、并发数和 Claude 是否参与。
+- 只有用户确认分工后，才创建 `.workflow-team/<change-id>/` 状态目录、worktree 和 worker 任务。
 - 每个 phase 必须可独立 Review、合并、回滚。
 - 开发可并行，合并必须串行。
 - phase-n 必须在 phase-(n-1) 合并后的基线上测试。
 - 回滚方案必须在测试环境验证，或说明无法验证原因。
 - PR 必须小范围串行推进。
+
+## 多 Agent 协作规则
+
+启用多 agent 后：
+
+- Codex App Leader 主控，负责拆任务、依赖、合并、总验证和 PR。
+- Codex worker 分工执行 Discovery / OpenSpec / Implementation / Test / Documentation。
+- Claude 只能在用户确认后作为 reviewer / critic / rescue 参与，默认只读审查。
+- `cc-plugin-codex` 是可选外部依赖，不随本 workflow 打包；未安装时 Claude review 标记为未启用或手动审查。
+- 多 worker 不共用同一个主工作区直接改代码。
+- Implementation Worker 使用独立 `git worktree`，或只输出 patch / result。
+- Leader 创建 `.workflow-team/<change-id>/`，并维护 `workflow-config.yaml`、`manifest.md`、`dependencies.md`、`worker-status.md`、`decisions.md`、`merge-log.md`。
+- 每个 worker 任务目录必须包含 `task.md`、`task-metadata.yaml`、`task-log.jsonl`、`result.md`、`result-metadata.yaml`。
+- `concurrency_group` 留空表示可并行；填写名称表示按 `workflow-config.yaml` 的 `max_parallel` 限流，`max_parallel: 1` 才是串行。
+- `file_locks` 支持通配符；锁范围重叠时必须串行。当前是文件协议，不是自动锁服务；Leader 需要手动判断，或使用后续辅助脚本检测。
+- 冲突必须写入 `冲突解决决策记录.md`。
+- Claude 审查必须使用 `Claude代码审查任务单.md` 提供 PRD、OpenSpec、diff/base、重点接口和风险边界。
+- 核心状态源是 `.workflow-team/<change-id>/` 文件协议，不依赖 Claude Code Task 工具作为唯一状态源。
 
 ## CodeGraph 代码图谱规则
 

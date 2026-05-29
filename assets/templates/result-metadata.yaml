@@ -1,0 +1,41 @@
+schema_version: "1.0"
+task_id: ""
+change_id: ""
+status: null # 未完成时保持 null；最终状态：accepted | failed | abandoned
+failure_reason: ""
+abandoned_reason: ""
+
+summary:
+  files_changed: 0
+  lines_added: 0
+  lines_removed: 0
+  duration_seconds: 0
+  token_usage: 0
+  retry_count: 0
+  escalated: false
+  patch_created: false
+  patch_path: ""
+
+risk:
+  touches_db: false
+  touches_security: false
+  touches_public_api: false
+  touches_transaction_boundary: false
+  requires_leader_decision: false
+  requires_claude_rerun: false
+  risk_level: "normal" # high | normal | low
+
+verification:
+  build_success: null
+  test_success: null
+  unit_test_success: null
+  integration_test_success: null
+  test_coverage: null
+  coverage_threshold: null
+  failed_tests: []
+  commands: []
+
+open_items:
+  uncovered_items: []
+  leader_decisions: []
+  follow_up_tasks: []

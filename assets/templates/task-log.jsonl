@@ -1,0 +1,7 @@
+{"timestamp":"2026-05-29T10:30:00Z","task_id":"001","event":"created","actor":"leader","message":"创建任务","percentage":0,"metadata":{}}
+{"timestamp":"2026-05-29T10:35:00Z","task_id":"001","event":"progress","actor":"worker","percentage":30,"message":"完成 OpenSpec 解析，开始生成代码","metadata":{}}
+{"timestamp":"2026-05-29T10:40:00Z","task_id":"001","event":"state_change","actor":"leader","from":"running","to":"blocked","reason":"上游任务失败","metadata":{}}
+{"timestamp":"2026-05-29T10:45:00Z","task_id":"001","event":"decision","actor":"leader","message":"上游任务已恢复，允许重试","metadata":{}}
+{"timestamp":"2026-05-29T10:46:00Z","task_id":"001","event":"state_change","actor":"leader","from":"blocked","to":"retrying","reason":"上游任务已恢复","metadata":{}}
+{"timestamp":"2026-05-29T10:48:00Z","task_id":"001","event":"state_change","actor":"leader","from":"retrying","to":"running","reason":"重试开始","metadata":{}}
+{"timestamp":"2026-05-29T10:50:00Z","task_id":"001","event":"verification","actor":"worker","command":"mvn test","success":true,"duration_seconds":180,"metadata":{}}

@@ -1,0 +1,95 @@
+schema_version: "1.0"
+change_id: ""
+
+schema:
+  version: "1.0"
+  evolution:
+    - "1.0: 初始版本"
+    - "新增字段必须提供默认值，保持向后兼容"
+    - "破坏性变更必须递增主版本号，并在 manifest.md 记录迁移说明"
+
+defaults:
+  timeout: "30m"
+  max_retries: 2
+  worktree_retention: "24h"
+  cleanup_on_failure: true
+  rollback_strategy: "create_patch" # discard_changes | create_patch | keep_worktree
+
+worktree:
+  base_path: "../{repo_name}-worktrees"
+  path_template: "{change_id}/{task_id}-{slug}"
+  branch_template: "codex/{change_id}/{task_id}-{slug}"
+
+budget:
+  max_workers: 5
+  max_implementation_concurrency: 2
+  max_claude_reviews: 1
+  estimated_tokens: 50000
+  max_rounds_per_worker: 2
+
+verification:
+  # 按项目实际命令改写。
+  build: "mvn clean compile"
+  unit_test: "mvn test"
+  integration_test: ""
+  coverage_command: ""
+  coverage_threshold: 0
+  manual_required: false
+
+status_values:
+  - pending
+  - ready
+  - running
+  - blocked
+  - failed
+  - retrying
+  - done
+  - accepted
+  - abandoned
+
+result_status_values:
+  - null
+  - accepted
+  - failed
+  - abandoned
+
+priority_values:
+  - high
+  - normal
+  - low
+
+event_values:
+  - created
+  - started
+  - progress
+  - state_change
+  - escalation
+  - decision
+  - verification
+
+# 留空或 null 表示不受并发组限制，可以和其他无冲突任务并行。
+# 填写名称表示同组任务按 max_parallel 限制执行；max_parallel: 1 等于串行。
+concurrency_groups:
+  discovery:
+    max_parallel: 1
+  contract-design:
+    max_parallel: 1
+  module-a:
+    max_parallel: 1
+  module-b:
+    max_parallel: 1
+  verification:
+    max_parallel: 1
+  review:
+    max_parallel: 1
+  database-migration:
+    max_parallel: 1
+  public-api-contract:
+    max_parallel: 1
+  security-sensitive:
+    max_parallel: 1
+
+file_lock_rules:
+  wildcard_supported: true
+  detection: "manual_or_helper_script"
+  note: "当前文件协议不自动检测通配符重叠；Leader 必须手动判断，或使用后续辅助脚本检测。示例：src/main/java/dto/*.java 与 src/main/java/dto/UserDTO.java 重叠。"

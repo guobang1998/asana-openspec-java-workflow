@@ -21,6 +21,7 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 - 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。
 - 没有未要求的功能、无关重构或过度抽象。
 - 项目有 `.codegraph/` 时，已完成 CodeGraph impact 复查。
+- 涉及 Java/Spring/MyBatis 行为变更时，AI 必须主动检查 CodeGraph 索引状态；缺少 CodeGraph impact 证据时不能给 PASS。
 
 ### 验证
 
@@ -33,6 +34,7 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 ### Review
 
 - 已跑 Java 后端评审。
+- 审查后如果用户说“下一步 / 开始 PR / 生成 PR 描述 / 没问题了”，自动进入本 PR Quality Gate，不要求用户记住提示词。
 - 已按 `coding-discipline` 检查修改范围和验证证据。
 - 已按 `java-coding-standard` 检查编码规范。
 - 已按 `springboot-service-patterns` 检查服务结构。
@@ -87,5 +89,11 @@ PASS：可以开 PR/合并
 BLOCKED：必须修复后再 PR
 CONDITIONAL：可 PR，但需在描述里标明风险
 ```
+
+判定规则：
+
+- 有 Java/Spring/MyBatis 行为变更，且项目有 `.codegraph/`，但未完成 CodeGraph impact：`BLOCKED`。
+- CodeGraph 暂不可用但已手动追踪影响面、风险可控：最多 `CONDITIONAL`，PR 描述必须写明降级原因和未确认风险。
+- 只有纯文档、注释、格式化、非代码资源改动时，可以不要求 CodeGraph impact，但要说明原因。
 
 不要只说“看起来可以”。必须列出验证证据或缺口。

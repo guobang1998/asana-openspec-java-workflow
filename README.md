@@ -35,7 +35,10 @@ Asana Epic
 -> CodeGraph Discovery
 -> 重构 RFC
 -> 测试基线
+-> 询问是否启用多 agent
+-> 确认 worker 数量和分工
 -> 多个 OpenSpec changes
+-> 可选 Claude review
 -> 小 PR 串行合并
 -> 清理旧代码
 ```
@@ -122,6 +125,12 @@ PRD 已确认。请创建 OpenSpec change，并按 asana-openspec-java-workflow 
 这是大重构。请使用 large-refactor-workflow，先做 Discovery、RFC、测试基线和 phase 拆分。
 ```
 
+多 agent 大重构：
+
+```text
+这是大重构。请先评估是否启用多 agent 协作；如果建议启用，请给出 worker 数量、分工、并发数、Claude 是否参与和预计成本，等我确认后再启动。
+```
+
 ## Skills
 
 | Skill | 用途 |
@@ -153,12 +162,27 @@ assets/templates/
   AGENTS模板.md
   PRD模板.md
   Asana字段模板.md
+  Claude代码审查任务单.md
   OpenSpec检查清单.md
   PR评审清单.md
   MySQL数据库安全模板.md
   重构RFC模板.md
   重构检查清单.md
+  多Agent重构任务单.md
+  workflow-config.yaml
+  manifest.md
+  task-metadata.yaml
+  task-log.jsonl
+  result-metadata.yaml
+  dependencies.md
+  worker-status.md
+  decisions.md
+  merge-log.md
+  冲突解决决策记录.md
   流程复盘记录模板.md
+
+docs/
+  多Agent重构协作方案.md
 
 团队安装指南.md
 安装配置指南.md
@@ -180,7 +204,9 @@ assets/templates/
 - 行为变更必须有测试，或说明不能自动化原因。
 - 涉及 DB 必须写影响面、SQL、回滚方案。
 - `DELETE`、`CREATE`、`ALTER` 必须确认。
-- 大重构必须先写 RFC，并拆多个 OpenSpec changes。
+- 大重构必须先写 RFC，并拆 phase / tasks。
+- 大重构必须评估是否启用多 agent 协作，并询问用户确认。
+- 启用多 agent 后，必须再确认 worker 数量、角色、并发数和 Claude 是否参与。
 - PR 前必须列出验证结果和未覆盖项。
 
 ## 推荐试点
@@ -205,5 +231,6 @@ assets/templates/
 - GitHub Connector
 - MySQL MCP
 - JDK / Maven / Gradle
+- `cc-plugin-codex`：可选。团队成员需要在 Codex App 中使用 Claude Code 审查时单独安装；本 workflow 不打包该插件。
 
 安装细节见：[安装配置指南.md](./安装配置指南.md)
