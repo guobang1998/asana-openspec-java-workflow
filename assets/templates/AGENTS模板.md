@@ -111,11 +111,24 @@
 - Plan Review 阶段先确认测试策略和回滚方案。
 - 行为变更必须有测试，或说明不能自动化原因。
 - Bugfix 必须有回归测试，先复现 bug 再修。
+- 生产问题、revert、重大漏检修复必须先确认复现方式；无法自动化复现时，必须写清手动复现和验证证据。
 - Service 逻辑优先 JUnit 5 + Mockito。
 - Controller/API 优先 MockMvc / WebMvcTest。
 - Mapper/SQL/事务优先集成测试。
 - 只能手动验证时，必须写环境、步骤、输入、预期、实际、证据。
 - PR 描述必须列出编译、单测、集成测试、手动验证和未覆盖项。
+
+## 反馈闭环与复盘
+
+- 用户提交问题后，先按既有 Asana / PRD / OpenSpec / CodeGraph / 实现 / 测试 / Review / PR Gate 流程处理当前问题。
+- AI 初步定位后，必须输出疑似根因、证据、影响面、修复方案和风险，让用户确认根因与处理模式。
+- 根因未确认前，不生成最终复盘结论，不更新中央 workflow，不把疑似问题沉淀为通用规则。
+- P0/P1 紧急问题优先止血，可先修复和验证，再补 PRD / OpenSpec / 复盘记录。
+- 普通 bugfix 在用户确认根因后，走轻量 PRD / OpenSpec，再修复。
+- 需求不清或会改变行为时，必须先 PRD，再 OpenSpec，再实现。
+- 生产问题、重大漏检、回归测试遗漏、revert 或 PR Gate 未拦住的风险，必须使用 `assets/templates/流程复盘记录模板.md` 生成 `docs/postmortem/<问题ID>-<问题摘要>.md`。
+- 可预防问题必须追加到 `docs/improvements/工作流改进追踪.md`，并标记是否建议升级中央 workflow。
+- 反馈包交给中央 workflow 维护者前必须脱敏。
 
 ## 安全规则
 

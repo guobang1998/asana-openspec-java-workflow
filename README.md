@@ -28,6 +28,18 @@ Asana 新需求
 -> Asana 完成
 ```
 
+反馈闭环走补充流程，不替代主交付流程：
+
+```text
+用户问题
+-> AI 初步定位并让用户确认根因和处理模式
+-> 按既有流程修复 / 生成 PRD-OpenSpec / 只调查
+-> 验证当前问题
+-> 生成 docs/postmortem/<问题ID>-<问题摘要>.md
+-> 追加 docs/improvements/工作流改进追踪.md
+-> 判断是否升级中央 workflow
+```
+
 大重构走升级流程：
 
 ```text
@@ -182,6 +194,10 @@ assets/templates/
   流程复盘记录模板.md
 
 docs/
+  postmortem/
+    README.md
+  improvements/
+    工作流改进追踪.md
   多Agent重构协作方案.md
 
 团队安装指南.md
@@ -202,6 +218,7 @@ docs/
 - 实现偏差时，先改 PRD/OpenSpec，再改代码。
 - 每个代码改动必须对应 PRD、OpenSpec 或 `tasks.md`。
 - 行为变更必须有测试，或说明不能自动化原因。
+- 生产问题、重大漏检、回归测试遗漏或 PR 被 revert 时，先解决当前问题，再生成复盘记录和改进追踪。
 - 涉及 DB 必须写影响面、SQL、回滚方案。
 - `DELETE`、`CREATE`、`ALTER` 必须确认。
 - 大重构必须先写 RFC，并拆 phase / tasks。
