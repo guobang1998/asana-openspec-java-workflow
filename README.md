@@ -16,10 +16,12 @@
 
 ```text
 Asana 新需求
+-> 可选 Superpowers brainstorming（仅需求模糊 / 新功能探索）
 -> PRD md
 -> OpenSpec 既有规格 / active changes 检查
 -> OpenSpec change
 -> CodeGraph 定位影响面
+-> 可选 Superpowers writing-plans（仅复杂实现 / 多文件多步骤）
 -> Codex 实现
 -> 单测/集成/手动验证
 -> Java/Security/MySQL/Quality Gate
@@ -53,6 +55,18 @@ Asana Epic
 -> 可选 Claude review
 -> 小 PR 串行合并
 -> 清理旧代码
+```
+
+Superpowers 只作为辅助节点，不替代主交付流程：
+
+```text
+需求模糊 / 新功能探索
+-> 可调用 superpowers:brainstorming 澄清目标、范围和方案
+-> 输出作为 PRD 输入
+
+PRD / OpenSpec 已确认，且实现复杂
+-> 可调用 superpowers:writing-plans 拆文件、步骤、测试和提交节奏
+-> 输出作为 OpenSpec tasks / 实现计划补充
 ```
 
 完整图见：[流程图.md](./流程图.md)
@@ -131,6 +145,18 @@ PRD 确认后：
 PRD 已确认。请创建 OpenSpec change，并按 asana-openspec-java-workflow 推进 design/tasks/specs。
 ```
 
+需求模糊或新功能探索时：
+
+```text
+这个需求还不清楚。请先用 superpowers:brainstorming 辅助澄清目标、范围和候选方案，产物只作为 PRD 输入，不直接进入实现。
+```
+
+实现复杂或多文件多步骤时：
+
+```text
+PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-plans 辅助拆执行计划，并保持计划服务于 OpenSpec tasks。
+```
+
 大重构：
 
 ```text
@@ -160,6 +186,15 @@ PRD 已确认。请创建 OpenSpec change，并按 asana-openspec-java-workflow 
 | `java-build-fix` | Maven/Gradle 构建失败修复 |
 | `java-backend-review` | Java 后端专项 Review |
 | `pr-quality-gate` | PR 前质量门禁 |
+
+## Superpowers 使用规则
+
+Superpowers 是辅助技能，不是本 workflow 的主流程。
+
+- 需求模糊、新功能探索、方案分歧较大时，可使用 `superpowers:brainstorming`；输出只作为 PRD 输入。
+- PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可使用 `superpowers:writing-plans`；输出只作为 OpenSpec `tasks.md` 和实现计划补充。
+- 紧急止血、明确 bugfix、小范围配置或文档调整，不强制使用 `superpowers:brainstorming`。
+- Superpowers 产物和已确认 PRD / OpenSpec 冲突时，以 PRD / OpenSpec 为准；必要时先更新主流程文档，再改代码。
 
 ## 目录结构
 
@@ -224,6 +259,7 @@ docs/
 - 大重构必须先写 RFC，并拆 phase / tasks。
 - 大重构必须评估是否启用多 agent 协作，并询问用户确认。
 - 启用多 agent 后，必须再确认 worker 数量、角色、并发数和 Claude 是否参与。
+- Superpowers 只按条件触发，不能跳过 PRD / OpenSpec / CodeGraph / 测试 / PR Gate。
 - PR 前必须列出验证结果和未覆盖项。
 
 ## 推荐试点
@@ -247,6 +283,7 @@ docs/
 - Asana Connector
 - GitHub Connector
 - MySQL MCP
+- Superpowers skills：可选。只用于需求澄清和复杂实现拆计划，不替代本 workflow。
 - JDK / Maven / Gradle
 - `cc-plugin-codex`：可选。团队成员需要在 Codex App 中使用 Claude Code 审查时单独安装；本 workflow 不打包该插件。
 

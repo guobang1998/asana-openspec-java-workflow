@@ -14,6 +14,16 @@
 - 每个需求必须记录 OpenSpec change-id。
 - PR 前必须给出验证结果、风险、回滚方案。
 
+## Superpowers 辅助规则
+
+- Superpowers 是辅助技能，不替代 Asana / PRD / OpenSpec / CodeGraph / 测试 / PR Gate 主流程。
+- 需求模糊、新功能探索或方案分歧较大时，可调用 `superpowers:brainstorming` 澄清目标、范围、候选方案和待确认问题。
+- `superpowers:brainstorming` 的输出只作为 PRD 输入；不能绕过 `prd-writer`，也不能直接进入实现。
+- PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可调用 `superpowers:writing-plans` 拆执行计划。
+- `superpowers:writing-plans` 的输出只作为 OpenSpec `tasks.md` 和实现计划补充；不能替代已确认 PRD / OpenSpec。
+- 紧急止血、明确 bugfix、小范围配置或文档调整，不强制使用 `superpowers:brainstorming`。
+- Superpowers 产物和已确认 PRD / OpenSpec 冲突时，以 PRD / OpenSpec 为准；必要时先更新主流程文档，再改代码。
+
 ## 小需求 / 大重构分流
 
 满足任一条件即视为大重构候选，先切换到 `large-refactor-workflow` 做评估，不直接默认启用多 agent：

@@ -11,11 +11,13 @@ description: Use when driving a requirement through the team's Asana + OpenSpec 
 
 ```text
 Asana 新需求
+-> 可选 Superpowers brainstorming
 -> PRD Writer
 -> PRD Review
 -> 小需求 / 大重构分流
 -> OpenSpec Planning
 -> Plan Review
+-> 可选 Superpowers writing-plans
 -> 开发中
 -> 测试迭代
 -> Review Gates
@@ -27,51 +29,62 @@ Asana 新需求
 ## 执行流程
 
 1. 读取 Asana 需求，确认标题、背景、目标、验收人、优先级、影响面。
-2. 总是先调用 `prd-writer`：
+2. 需求模糊、新功能探索或方案分歧较大时，可先调用 `superpowers:brainstorming`：
+   - 只用于澄清目标、范围、候选方案和待确认问题。
+   - 输出只作为 PRD 输入，不替代 `prd-writer`。
+   - 明确 bugfix、紧急止血、小范围配置或文档调整可跳过。
+3. 总是先调用 `prd-writer`：
    - 信息足够：输出完整 PRD。
    - 信息不足：输出待确认问题列表，回 Asana 评论，不写代码。
-3. PRD 确认后，判断是小需求还是大重构。
-4. 满足任一条件即视为大重构：
+4. PRD 确认后，判断是小需求还是大重构。
+5. 满足任一条件即视为大重构：
    - 跨 3 个以上模块。
    - 影响多层：Controller / Service / Mapper。
    - 改核心模型、核心表、核心接口。
    - 预计超过 2 天。
    - 需求关键词包含：重构、治理、解耦、升级、统一、替换。
-5. 如果是大重构，调用 `large-refactor-workflow`，生成 RFC、测试基线和 phase 拆分。
-6. 如果是小需求，PRD 确认后先做 OpenSpec 既有规格检查，再创建 OpenSpec change：
+6. 如果是大重构，调用 `large-refactor-workflow`，生成 RFC、测试基线和 phase 拆分。
+7. 如果是小需求，PRD 确认后先做 OpenSpec 既有规格检查，再创建 OpenSpec change：
    - 查相关 `openspec/specs/*`，确认已归档需求形成的当前系统规格。
    - 查 `openspec/changes/*` active changes，确认是否有并行变更冲突。
    - 查相关历史 PRD、Asana 链接或 archived change，确认旧验收标准是否会被破坏。
    - 在 `design.md` 写清“与既有规格/历史需求的关系”：兼容、扩展、替换或冲突处理。
-7. 定位影响面：
+8. 定位影响面：
    - 优先：`codegraph-context-guard`，查入口、调用链、callers/callees、impact。
    - 降级：`rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取，手动追踪调用链。
    - 最低：依赖人工 Code Review 明确影响面。
-8. 检查 OpenSpec 文件：
+9. 检查 OpenSpec 文件：
    - `proposal.md`
    - `design.md`
    - `tasks.md`
    - `specs/`
-9. 实现前做 Plan Review，确认：
+10. 实现前做 Plan Review，确认：
    - 任务拆分。
    - 风险点。
    - 测试策略：单测 / 集成测试 / 手动验证。
    - 回滚方案：涉及 DB、核心逻辑、权限、状态流转时必须写清。
-10. 实现前调用 `coding-discipline`，确认假设、范围、不做内容、验证方式。
-11. 实现时按 `java-coding-standard` 和 `springboot-service-patterns` 推进。
-12. 涉及接口、权限、输入、密钥、敏感数据时，调用 `springboot-security-review`。
-13. 构建失败时调用 `java-build-fix`，只做最小修复。
-14. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
-15. 实现后再次调用 `java-test-strategy`，按第 9 步测试策略确认单测、集成测试、手动验证是否完成。
-16. 实现后调用 `codegraph-context-guard` 复查 impact，再调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
-17. PR 描述必须包含 Asana 链接、OpenSpec change-id、测试结果、风险说明、回滚方案。
-18. 合并后执行 OpenSpec verify/archive，并更新 Asana 状态。
-19. 完成后记录流程改进数据。
+11. PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可调用 `superpowers:writing-plans`：
+   - 输出文件清单、步骤、测试命令和提交节奏。
+   - 输出只作为 OpenSpec `tasks.md` 和实现计划补充。
+   - 不替代已确认 PRD / OpenSpec；冲突时先更新主流程文档。
+12. 实现前调用 `coding-discipline`，确认假设、范围、不做内容、验证方式。
+13. 实现时按 `java-coding-standard` 和 `springboot-service-patterns` 推进。
+14. 涉及接口、权限、输入、密钥、敏感数据时，调用 `springboot-security-review`。
+15. 构建失败时调用 `java-build-fix`，只做最小修复。
+16. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
+17. 实现后再次调用 `java-test-strategy`，按第 10 步测试策略确认单测、集成测试、手动验证是否完成。
+18. 实现后调用 `codegraph-context-guard` 复查 impact，再调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
+19. PR 描述必须包含 Asana 链接、OpenSpec change-id、测试结果、风险说明、回滚方案。
+20. 合并后执行 OpenSpec verify/archive，并更新 Asana 状态。
+21. 完成后记录流程改进数据。
 
 ## 决策规则
 
 - Asana 是需求入口，不承载完整实现细节。
 - PRD 是业务合同，OpenSpec 是变更账本。
+- Superpowers 是辅助技能，只按条件触发，不接管主流程。
+- `superpowers:brainstorming` 只用于需求澄清，输出进入 PRD。
+- `superpowers:writing-plans` 只用于复杂实现拆计划，输出服务 OpenSpec `tasks.md`。
 - PRD 未确认，不创建正式 OpenSpec change。
 - OpenSpec 不清楚时，不进入实现。
 - 大重构不用单个 OpenSpec change 承载全部变更。
