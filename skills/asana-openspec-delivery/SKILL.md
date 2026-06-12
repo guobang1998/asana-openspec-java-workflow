@@ -43,10 +43,12 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 -> 小需求 / 大重构分流
 -> OpenSpec Planning
 -> Plan Review
+-> 分段审核基础判断
 -> 可选 Superpowers writing-plans
 -> 开发中
 -> 测试迭代
 -> Review Gates
+-> 必要时高风险复查
 -> 待 PR
 -> 合并
 -> OpenSpec archive
@@ -93,6 +95,8 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
    - 风险点。
    - 测试策略：单测 / 集成测试 / 手动验证。
    - 回滚方案：涉及 DB、核心逻辑、权限、状态流转时必须写清。
+   - 分段审核基础判断：风险等级、命中条件、是否建议实现前复查。
+   - 命中 A 类或明显 B 类风险时，先写实现前边界声明，再判断是否做实现前复查。
 11. PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可调用 `superpowers:writing-plans`：
    - 输出文件清单、步骤、测试命令和提交节奏。
    - 输出只作为 OpenSpec `tasks.md` 和实现计划补充。
@@ -103,10 +107,37 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 15. 构建失败时调用 `java-build-fix`，只做最小修复。
 16. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
 17. 实现后再次调用 `java-test-strategy`，按第 10 步测试策略确认单测、集成测试、手动验证是否完成。
-18. 实现后调用 `codegraph-context-guard` 复查 impact，再调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
-19. PR 描述必须包含需求来源、OpenSpec change-id、测试结果、风险说明、回滚方案；有 Asana 时必须包含 Asana 链接。
-20. 合并后执行 OpenSpec verify/archive；有 Asana 时更新 Asana 状态。
-21. 完成后记录流程改进数据。
+18. 实现后调用 `codegraph-context-guard` 复查 impact，填写 `assets/templates/PR评审清单.md` 的分段审核基础判断；B 类、A 类或大重构按条件补扩展字段。
+19. 实现后调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
+20. PR 描述必须包含需求来源、OpenSpec change-id、测试结果、风险说明、回滚方案；有 Asana 时必须包含 Asana 链接。
+21. 合并后执行 OpenSpec verify/archive；有 Asana 时更新 Asana 状态。
+22. 完成后记录流程改进数据；试运行阶段如触发高风险复查或字段过重，补充 `assets/templates/分段审核与高风险复查试运行记录.md`。
+
+## 分段审核与高风险复查软接入
+
+分段审核与高风险复查按 `docs/workflow/大需求分段审核与高风险复查协议.md` 执行，当前是软接入，不替代 PRD、OpenSpec、CodeGraph、测试和 PR Gate。主流程先做 phase / PR 基础判断，命中风险再触发复查。
+
+执行入口：
+
+- PRD / 需求澄清：判断是否可能命中 A 类或 B 类。
+- OpenSpec / RFC：记录 phase 切分、实现前边界声明和 A 类高风险链路映射。
+- 实现前：A 类或明显 B 类风险先做实现前复查判断。
+- 实现后 / PR 前：在 `PR评审清单.md` 填写基础判断，按风险等级补扩展字段。
+- PR Gate：检查是否填写基础判断、跳过高风险复查原因和替代证据。
+- 复盘 / 规则回流：重复问题或 A 类严重遗漏升级为 checklist、AGENTS、skill 或问题地图。
+
+字段分层：
+
+- C 类小改：只填基础判断和未触发原因。
+- B 类 / 大重构：补实现路径、关键设计选择、CodeGraph impact、风险回看和继续推进依据。
+- A 类：强制补高风险链路映射、当前控制方式、剩余风险和实现前后高风险复查记录。
+
+试运行规则：
+
+- 先拿 1 个 C 类小改和 1 个复杂迁移 slice 试填。
+- 再在 3 到 5 个真实大需求中观察字段成本和风险命中率。
+- 字段大量空置时，先删减或改成条件字段，不升级硬门禁。
+- 字段稳定有效后，才考虑将 PR Gate 软检查升级为硬阻断或自动化审计。
 
 ## 决策规则
 
@@ -179,13 +210,15 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 - 需要数据迁移，例如影响行数 > 1000。
 - 需要停机窗口。
 - 发现安全漏洞或权限绕过。
+- 命中 A 类高风险链路，但缺少实现前边界声明、负责人确认人、确认时间、确认依据、CodeGraph impact、关键测试证据或回滚方案。
 
 升级动作：
 
 1. 更新 OpenSpec `design.md` 风险部分。
 2. 有 Asana 时评论 @验收人；没有 Asana 时在 PRD/OpenSpec 风险区记录待确认人。
 3. 评估是否需要切换到 `large-refactor-workflow`。
-4. 暂停实现，等待确认；确认后再继续原流程、补充设计后继续，或切换大重构流程。
+4. 评估是否需要触发实现前复查或实现后复查。
+5. 暂停实现，等待确认；确认后再继续原流程、补充设计后继续，或切换大重构流程。
 
 ## 完成后记录
 
@@ -207,6 +240,7 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 - 测试、Review、风险记录完整。
 - 涉及 MySQL 时，已记录 SQL、影响行数、确认结果和回滚方案。
 - 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。
+- 已填写分段审核基础判断；B 类、A 类或大重构已按条件补充扩展字段或写明不触发原因。
 - 涉及安全敏感点时，已完成 Spring Boot Security Review。
 - 已给出入口、调用链、影响面；没有 CodeGraph 时，说明降级追踪方式。
 - 行为变更已有单测/集成测试，或明确说明只能手动验证的原因和证据。

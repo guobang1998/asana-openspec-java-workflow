@@ -25,9 +25,11 @@
 -> OpenSpec 既有规格 / active changes 检查
 -> OpenSpec change
 -> CodeGraph 定位影响面
+-> 分段审核基础判断（风险等级 / 是否建议高风险复查）
 -> 可选 Superpowers writing-plans（仅复杂实现 / 多文件多步骤）
 -> Codex 实现
 -> 单测/集成/手动验证
+-> 必要时高风险复查（只审范围、边界、风险和证据）
 -> Java/Security/MySQL/Quality Gate
 -> PR
 -> OpenSpec archive
@@ -58,9 +60,13 @@
 -> CodeGraph Discovery
 -> 重构 RFC
 -> 测试基线
+-> phase 拆分 + 实现前边界声明
+-> 分段审核基础判断
 -> 询问是否启用多 agent
 -> 确认 worker 数量和分工
 -> 多个 OpenSpec changes
+-> phase 出口分段审核
+-> 必要时高风险复查
 -> 可选 Claude review
 -> 小 PR 串行合并
 -> 清理旧代码
@@ -241,6 +247,7 @@ assets/templates/
   Claude代码审查任务单.md
   OpenSpec检查清单.md
   PR评审清单.md
+  分段审核与高风险复查试运行记录.md
   MySQL数据库安全模板.md
   重构RFC模板.md
   重构检查清单.md
@@ -258,6 +265,8 @@ assets/templates/
   流程复盘记录模板.md
 
 docs/
+  workflow/
+    大需求分段审核与高风险复查协议.md
   postmortem/
     README.md
   improvements/
@@ -281,6 +290,8 @@ docs/
 - PRD 未确认，不进入实现。
 - 创建或更新 OpenSpec change 前，先查既有 specs、active changes、历史 PRD/Asana/会议纪要/问题记录，确认不破坏旧验收标准。
 - `design.md` 必须写明本次变更与既有规格/历史需求的关系。
+- PR 前必须填写分段审核基础判断；B 类、A 类或大重构按条件补扩展字段。
+- 高风险复查按风险触发，不按工具触发；Claude 只是可选承载方式。
 - 实现偏差时，先改 PRD/OpenSpec，再改代码。
 - 每个代码改动必须对应 PRD、OpenSpec 或 `tasks.md`。
 - 行为变更必须有测试，或说明不能自动化原因。
