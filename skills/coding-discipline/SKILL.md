@@ -1,6 +1,6 @@
 ---
 name: coding-discipline
-description: Use before writing, modifying, refactoring, or reviewing code in this Asana + OpenSpec + Java workflow. Applies Karpathy-style AI coding discipline: do not guess, keep changes surgical, avoid overengineering, tie every edit to PRD/OpenSpec/tasks, and define verification before claiming completion.
+description: "Use before writing, modifying, refactoring, or reviewing code in this Asana + OpenSpec + Java workflow. Applies Karpathy-style AI coding discipline: do not guess, keep changes surgical, avoid overengineering, tie every edit to PRD/OpenSpec/tasks, and define verification before claiming completion."
 ---
 
 # Coding Discipline

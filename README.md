@@ -1,9 +1,10 @@
 # Asana OpenSpec Java Workflow
 
-面向 Java/Spring/MyBatis 后端团队的 Codex 工作流工具包。它把 Asana 需求推进为 PRD、OpenSpec change、代码实现、测试、Review 和 PR，避免 AI 只靠聊天上下文直接乱改代码。
+面向 Java/Spring/MyBatis 后端团队的多入口需求 + OpenSpec + Codex 工作流工具包。它把来自 Asana、用户对话、会议纪要、线上问题或技术债的需求推进为 PRD、OpenSpec change、代码实现、测试、Review 和 PR，避免 AI 只靠聊天上下文直接乱改代码。
 
 ## 解决什么问题
 
+- 需求来源很多，但没有统一入口路由。
 - 新需求没有结构化 PRD。
 - AI 写代码前没有变更设计。
 - AI 容易乱定位代码、漏调用链。
@@ -15,9 +16,12 @@
 ## 核心流程
 
 ```text
-Asana 新需求
--> 可选 Superpowers brainstorming（仅需求模糊 / 新功能探索）
--> PRD md
+需求入口（Asana / 用户对话 / 会议纪要 / 线上问题 / 技术债）
+-> 入口路由判断
+-> 明确需求：PRD md
+-> 模糊需求：轻量澄清 / 按条件进入 superpowers:brainstorming
+-> 新功能探索 / 方案分歧：superpowers:brainstorming
+-> PRD 确认
 -> OpenSpec 既有规格 / active changes 检查
 -> OpenSpec change
 -> CodeGraph 定位影响面
@@ -27,8 +31,13 @@ Asana 新需求
 -> Java/Security/MySQL/Quality Gate
 -> PR
 -> OpenSpec archive
--> Asana 完成
 ```
+
+核心结论：
+
+- Asana 是需求跟踪入口之一，不是唯一入口。
+- 模糊需求必须先 brainstorming；轻量澄清或正式 `superpowers:brainstorming` 的输出只作为 PRD 输入。
+- 没有 Asana 可以启动需求澄清和 PRD 草稿；没有确认 PRD / OpenSpec 不进入行为变更实现。
 
 反馈闭环走补充流程，不替代主交付流程：
 
@@ -45,7 +54,7 @@ Asana 新需求
 大重构走升级流程：
 
 ```text
-Asana Epic
+重构入口（Asana Epic / 技术债 / 架构治理）
 -> CodeGraph Discovery
 -> 重构 RFC
 -> 测试基线
@@ -61,7 +70,8 @@ Superpowers 只作为辅助节点，不替代主交付流程：
 
 ```text
 需求模糊 / 新功能探索
--> 可调用 superpowers:brainstorming 澄清目标、范围和方案
+-> 必须先澄清目标、范围和方案
+-> 小范围低风险可做轻量澄清；范围不清、方案分歧、新功能探索必须调用 superpowers:brainstorming
 -> 输出作为 PRD 输入
 
 PRD / OpenSpec 已确认，且实现复杂
@@ -76,13 +86,17 @@ PRD / OpenSpec 已确认，且实现复杂
 Windows：
 
 ```powershell
-git clone <repo-url> "$env:USERPROFILE\.codex\plugins\asana-openspec-java-workflow"
+git clone <repo-url> "$env:USERPROFILE\plugins\asana-openspec-java-workflow"
+# 首次安装前先按 团队安装指南.md 创建 personal marketplace
+codex plugin add asana-openspec-java-workflow@personal
 ```
 
 macOS / Linux：
 
 ```bash
-git clone <repo-url> ~/.codex/plugins/asana-openspec-java-workflow
+git clone <repo-url> ~/plugins/asana-openspec-java-workflow
+# 首次安装前先按 团队安装指南.md 创建 personal marketplace
+codex plugin add asana-openspec-java-workflow@personal
 ```
 
 更多说明见：[团队安装指南.md](./团队安装指南.md)
@@ -130,13 +144,19 @@ openspec update
 在 Codex 里说：
 
 ```text
-请按 asana-openspec-java-workflow 流程处理这个 Asana 需求。
+请按 asana-openspec-java-workflow 多入口需求路由处理这个需求。它可能来自 Asana、用户对话、会议纪要、线上问题或技术债想法；如果需求模糊，先澄清，不要写代码。
 ```
 
 先生成 PRD：
 
 ```text
 请使用 prd-writer，把这个需求整理成 PRD md。信息不够先列待确认问题，不要写代码。
+```
+
+没有 Asana 的会议/对话需求：
+
+```text
+这不是 Asana 任务，是会议里提到的想法。请先生成 PRD 草稿，记录需求来源和待确认问题，不要写代码。
 ```
 
 PRD 确认后：
@@ -171,13 +191,19 @@ PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-
 
 ## Skills
 
+下表是本插件随包提供的 skills。团队成员需要把插件 clone 到本地插件源码目录，创建 personal marketplace，并执行 `codex plugin add asana-openspec-java-workflow@personal` 后，skill 名称才会在新会话中暴露。
+
+插件 skills 在 Codex 可用清单里通常带插件前缀，例如 `asana-openspec-java-workflow:coding-discipline`。表中为文档简称；实际提示词优先使用带前缀名称。
+
+如果当前会话提示“没有名为 xxx 的 skill”，先检查插件安装位置；仍不可用时，按项目 `AGENTS.md` 中对应规则执行，不要跳过 PRD / OpenSpec / CodeGraph / 测试 / PR Gate。
+
 | Skill | 用途 |
 |---|---|
-| `prd-writer` | Asana 需求转 PRD |
-| `asana-openspec-delivery` | 主交付流程 |
+| `prd-writer` | 多入口需求转 PRD |
+| `asana-openspec-java-workflow:asana-openspec-delivery` | 主交付流程 |
 | `large-refactor-workflow` | 大重构升级流程 |
 | `codegraph-context-guard` | 代码图谱定位和影响面复查 |
-| `coding-discipline` | AI 写代码纪律 |
+| `asana-openspec-java-workflow:coding-discipline` | AI 写代码纪律 |
 | `java-coding-standard` | Java 编码规范 |
 | `springboot-service-patterns` | Spring Boot 服务设计 |
 | `springboot-security-review` | Spring Boot 安全评审 |
@@ -191,7 +217,10 @@ PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-
 
 Superpowers 是辅助技能，不是本 workflow 的主流程。
 
-- 需求模糊、新功能探索、方案分歧较大时，可使用 `superpowers:brainstorming`；输出只作为 PRD 输入。
+- 模糊需求、新功能探索、方案分歧较大时，brainstorming 是一等入口；输出只作为 PRD 输入。
+- 轻量澄清适用于小范围、低风险、目标基本可判断的模糊需求，只输出目标、范围、不做什么、待确认问题，并进入 PRD 草稿。
+- 正式 `superpowers:brainstorming` 适用于新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清、可能演化成重构的需求。
+- 轻量澄清和正式 `superpowers:brainstorming` 都不能直接进入实现。
 - PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可使用 `superpowers:writing-plans`；输出只作为 OpenSpec `tasks.md` 和实现计划补充。
 - 紧急止血、明确 bugfix、小范围配置或文档调整，不强制使用 `superpowers:brainstorming`。
 - Superpowers 产物和已确认 PRD / OpenSpec 冲突时，以 PRD / OpenSpec 为准；必要时先更新主流程文档，再改代码。
@@ -247,8 +276,10 @@ docs/
 ## 团队规则
 
 - 需求不清楚，不写代码。
+- 需求入口不限于 Asana，也可以来自用户对话、会议纪要、线上问题、技术债或新功能探索。
+- 没有 Asana 可以启动需求澄清；需要团队协作、排期或跨团队跟踪时，应后补 Asana。
 - PRD 未确认，不进入实现。
-- 创建或更新 OpenSpec change 前，先查既有 specs、active changes、历史 PRD/Asana，确认不破坏旧验收标准。
+- 创建或更新 OpenSpec change 前，先查既有 specs、active changes、历史 PRD/Asana/会议纪要/问题记录，确认不破坏旧验收标准。
 - `design.md` 必须写明本次变更与既有规格/历史需求的关系。
 - 实现偏差时，先改 PRD/OpenSpec，再改代码。
 - 每个代码改动必须对应 PRD、OpenSpec 或 `tasks.md`。
@@ -280,7 +311,7 @@ docs/
 
 - OpenSpec
 - CodeGraph
-- Asana Connector
+- Asana Connector：可选；用于需求跟踪、负责人、优先级、排期和状态流转。
 - GitHub Connector
 - MySQL MCP
 - Superpowers skills：可选。只用于需求澄清和复杂实现拆计划，不替代本 workflow。

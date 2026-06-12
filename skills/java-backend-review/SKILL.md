@@ -7,7 +7,7 @@ description: Use when reviewing Java, Spring Boot, MyBatis, SQL, transaction log
 
 面向 Java/Spring/MyBatis 后端的专项评审。先看风险，再看风格。
 
-评审前先应用 `coding-discipline`：确认改动是否小范围、是否有需求依据、是否存在无关重构或过度设计。写法问题优先参考 `java-coding-standard`，Spring 服务结构优先参考 `springboot-service-patterns`。
+评审前先应用 `asana-openspec-java-workflow:coding-discipline`：确认改动是否小范围、是否有需求依据、是否存在无关重构或过度设计。写法问题优先参考 `java-coding-standard`，Spring 服务结构优先参考 `springboot-service-patterns`。
 
 ## 检查清单
 

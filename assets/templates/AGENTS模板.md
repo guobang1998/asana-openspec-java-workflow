@@ -2,12 +2,22 @@
 
 默认中文回答。生成的描述、注释、模板内容使用中文；Java identifiers、annotations、SQL、config keys、API names、stack traces 保留原文。
 
+## 需求入口规则
+
+- 需求入口不限于 Asana，也可以来自用户对话、会议纪要、线上问题、技术债或新功能探索。
+- Asana 是需求跟踪系统，不是唯一入口。
+- 模糊需求、新功能探索、方案分歧必须先澄清；范围不清、方案分歧较大、用户体验/业务口径不清或可能重构时，必须使用 `superpowers:brainstorming`。
+- 轻量澄清是 `prd-writer` / delivery 内的最小澄清模式，只适用于小范围、低风险、目标基本可判断的模糊需求。
+- brainstorming 产物只作为 PRD 输入，不直接替代 PRD / OpenSpec。
+- 没有 Asana 可以启动需求澄清；没有确认 PRD / OpenSpec 不允许进入行为变更实现。
+- 需要团队协作、排期或跨团队跟踪时，应后补 Asana。
+- 非 Asana 入口必须在 PRD 中记录需求来源、是否已有 Asana 和跟踪要求。
+
 ## 需求流程
 
-- 需求入口是 Asana。
 - 每个需求总是先生成 PRD；信息不足时输出待确认问题，不写代码。
 - PRD 未确认，不创建正式 OpenSpec change。
-- 创建或更新 OpenSpec change 前，必须检查相关 `openspec/specs/*`、`openspec/changes/*` active changes、历史 PRD / Asana / archived change。
+- 创建或更新 OpenSpec change 前，必须检查相关 `openspec/specs/*`、`openspec/changes/*` active changes、历史 PRD / Asana / 会议纪要 / 问题记录 / archived change。
 - `design.md` 必须写明本次变更与既有规格/历史需求的关系：兼容、扩展、替换或冲突处理。
 - 如果会破坏旧验收标准，必须写明迁移策略、回滚方案和验收人确认。
 - 实现偏差时先更新 PRD/OpenSpec，再改代码。
@@ -16,8 +26,9 @@
 
 ## Superpowers 辅助规则
 
-- Superpowers 是辅助技能，不替代 Asana / PRD / OpenSpec / CodeGraph / 测试 / PR Gate 主流程。
-- 需求模糊、新功能探索或方案分歧较大时，可调用 `superpowers:brainstorming` 澄清目标、范围、候选方案和待确认问题。
+- Superpowers 是辅助技能，不替代需求入口记录 / PRD / OpenSpec / CodeGraph / 测试 / PR Gate 主流程。
+- 小范围、低风险、目标基本可判断的模糊需求，可以先做轻量澄清。
+- 新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清或可能重构时，必须调用 `superpowers:brainstorming` 澄清目标、范围、候选方案和待确认问题。
 - `superpowers:brainstorming` 的输出只作为 PRD 输入；不能绕过 `prd-writer`，也不能直接进入实现。
 - PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可调用 `superpowers:writing-plans` 拆执行计划。
 - `superpowers:writing-plans` 的输出只作为 OpenSpec `tasks.md` 和实现计划补充；不能替代已确认 PRD / OpenSpec。
@@ -38,7 +49,7 @@
 
 - 大重构不允许用一个巨大 OpenSpec change 承载全部变更。
 - 命中跨模块、核心模型、核心表、核心接口、预计超过 2 天时，先走 `large-refactor-workflow`。
-- 先建 Asana Epic。
+- 需要团队排期或跨团队跟踪时，先建或关联 Asana Epic；没有 Asana 时先记录需求来源并写 RFC 草稿。
 - 先用 CodeGraph 做 Discovery。
 - 先写 `docs/refactor/<重构名>/重构RFC.md`。
 - 先补测试基线，再改结构。
@@ -84,7 +95,7 @@
 
 ## AI 写代码纪律
 
-- 不猜需求；不清楚先写 PRD 的待确认问题，或回 Asana 评论。
+- 不猜需求；不清楚先写 PRD 的待确认问题，有 Asana 时可回 Asana 评论。
 - 不做未要求的功能。
 - 不做无关重构。
 - 不做“未来可能有用”的抽象。
@@ -130,7 +141,7 @@
 
 ## 反馈闭环与复盘
 
-- 用户提交问题后，先按既有 Asana / PRD / OpenSpec / CodeGraph / 实现 / 测试 / Review / PR Gate 流程处理当前问题。
+- 用户提交问题后，先按既有需求来源 / PRD / OpenSpec / CodeGraph / 实现 / 测试 / Review / PR Gate 流程处理当前问题。
 - AI 初步定位后，必须输出疑似根因、证据、影响面、修复方案和风险，让用户确认根因与处理模式。
 - 根因未确认前，不生成最终复盘结论，不更新中央 workflow，不把疑似问题沉淀为通用规则。
 - P0/P1 紧急问题优先止血，可先修复和验证，再补 PRD / OpenSpec / 复盘记录。
@@ -139,6 +150,16 @@
 - 生产问题、重大漏检、回归测试遗漏、revert 或 PR Gate 未拦住的风险，必须使用 `assets/templates/流程复盘记录模板.md` 生成 `docs/postmortem/<问题ID>-<问题摘要>.md`。
 - 可预防问题必须追加到 `docs/improvements/工作流改进追踪.md`，并标记是否建议升级中央 workflow。
 - 反馈包交给中央 workflow 维护者前必须脱敏。
+
+## Codex 交接与知识沉淀规则
+
+- 每次完成明确 coding session、修复任务、功能开发、排查任务，结束前应生成一份结构化交接。
+- 交接至少包含：今日任务、今日完成、关键改动、改动文件、遇到的问题、未解决事项、风险/待确认、明日建议。
+- 对每个问题，补充：问题类型、是否建议进入问题地图、建议归类到哪个索引。
+- 问题类型优先使用：工具链 / 需求规格 / 高风险工程 / 代码理解 / 测试验证 / 交付治理。
+- 每次交接都补 `下次可直接复用的东西`，明确哪些判断、步骤、模板、检查单可以直接复用。
+- 如果某类问题高概率重复出现，应建议沉淀到问题索引页，而不只停留在当次交接。
+- 若团队使用 Obsidian，可将问题索引汇总到 `AI Coding 常见问题地图` 一类页面。
 
 ## 安全规则
 
@@ -188,7 +209,7 @@
 - 需要停机窗口。
 - 发现安全漏洞或权限绕过。
 
-升级动作：更新 OpenSpec `design.md` 风险部分，在 Asana 评论 @验收人，评估是否切换到大重构流程，并暂停实现等待确认。
+升级动作：更新 OpenSpec `design.md` 风险部分，有 Asana 时评论 @验收人，评估是否切换到大重构流程，并暂停实现等待确认。
 
 ## Review 规则
 

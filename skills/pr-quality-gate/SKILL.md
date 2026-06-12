@@ -35,7 +35,7 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 
 - 已跑 Java 后端评审。
 - 审查后如果用户说“下一步 / 开始 PR / 生成 PR 描述 / 没问题了”，自动进入本 PR Quality Gate，不要求用户记住提示词。
-- 已按 `coding-discipline` 检查修改范围和验证证据。
+- 已按 `asana-openspec-java-workflow:coding-discipline` 检查修改范围和验证证据。
 - 已按 `java-coding-standard` 检查编码规范。
 - 已按 `springboot-service-patterns` 检查服务结构。
 - 涉及安全敏感点时，已跑 `springboot-security-review`。
