@@ -94,6 +94,7 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
    - 任务拆分。
    - 风险点。
    - 测试策略：单测 / 集成测试 / 手动验证。
+   - SQL / 接口性能策略：列表、搜索、统计、导出、分页、排序、索引、`EXPLAIN` 证据。
    - 回滚方案：涉及 DB、核心逻辑、权限、状态流转时必须写清。
    - 分段审核基础判断：风险等级、命中条件、是否建议实现前复查。
    - 命中 A 类或明显 B 类风险时，先写实现前边界声明，再判断是否做实现前复查。
@@ -102,13 +103,13 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
    - 输出只作为 OpenSpec `tasks.md` 和实现计划补充。
    - 不替代已确认 PRD / OpenSpec；冲突时先更新主流程文档。
 12. 实现前调用 `asana-openspec-java-workflow:coding-discipline`，确认假设、范围、不做内容、验证方式。
-13. 实现时按 `java-coding-standard` 和 `springboot-service-patterns` 推进。
+13. 实现时按 `java-coding-standard`、`springboot-service-patterns` 和 `sql-performance-review` 编码模式推进；涉及 Mapper/SQL、列表/搜索/统计/导出接口、分页排序、动态查询或索引时，先按 SQL 性能规则设计查询，再写代码。
 14. 涉及接口、权限、输入、密钥、敏感数据时，调用 `springboot-security-review`。
 15. 构建失败时调用 `java-build-fix`，只做最小修复。
 16. 发现需求偏差时，先更新 PRD/OpenSpec，再改代码。
 17. 实现后再次调用 `java-test-strategy`，按第 10 步测试策略确认单测、集成测试、手动验证是否完成。
 18. 实现后调用 `codegraph-context-guard` 复查 impact，填写 `assets/templates/PR评审清单.md` 的分段审核基础判断；B 类、A 类或大重构按条件补扩展字段。
-19. 实现后调用 `java-backend-review`、`mysql-db-guard` 和 `pr-quality-gate`。
+19. 实现后调用 `java-backend-review`，并按 `sql-performance-review` 审查模式检查 SQL/查询接口；再调用 `mysql-db-guard` 和 `pr-quality-gate`。不涉及 SQL/查询接口时，在 PR Gate 中写明不触发原因。
 20. PR 描述必须包含需求来源、OpenSpec change-id、测试结果、风险说明、回滚方案；有 Asana 时必须包含 Asana 链接。
 21. 合并后执行 OpenSpec verify/archive；有 Asana 时更新 Asana 状态。
 22. 完成后记录流程改进数据；试运行阶段如触发高风险复查或字段过重，补充 `assets/templates/分段审核与高风险复查试运行记录.md`。
@@ -198,6 +199,7 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 - OpenSpec 失败：停止实现，记录命令、错误和 change-id，修复后重跑。
 - CodeGraph 失败：降级到 `rg` / `find`(bash) 或 `Get-ChildItem`(PowerShell) / 文件读取，并在 PR 里说明定位方式。
 - MySQL MCP 失败：不绕过 `mysql-db-guard`，输出 SQL、影响面和回滚方案，改人工执行。
+- SQL 性能证据缺失：不绕过 `sql-performance-review`，先做静态评审；高风险 SQL 缺少 `EXPLAIN` 时不得给 PASS。
 - 构建/测试失败：调用 `java-build-fix`，不能跳过测试伪造通过。
 - Asana / GitHub Connector 失败：手动补齐链接和上下文；连接恢复后，有 Asana 时补回状态。
 
@@ -239,6 +241,7 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 - PR 已合并或给出阻塞原因。
 - 测试、Review、风险记录完整。
 - 涉及 MySQL 时，已记录 SQL、影响行数、确认结果和回滚方案。
+- 涉及 SQL/查询接口时，已完成 `sql-performance-review`，并记录分页、排序、索引、`EXPLAIN` 或低风险理由。
 - 每个代码改动都能对应 PRD、OpenSpec 或 `tasks.md`。
 - 已填写分段审核基础判断；B 类、A 类或大重构已按条件补充扩展字段或写明不触发原因。
 - 涉及安全敏感点时，已完成 Spring Boot Security Review。

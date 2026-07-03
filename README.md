@@ -9,6 +9,7 @@
 - AI 写代码前没有变更设计。
 - AI 容易乱定位代码、漏调用链。
 - Java/Spring/MyBatis 代码规范不统一。
+- SQL 能实现功能但接口慢、索引和分页证据不足。
 - MySQL 写入、DDL、DELETE 缺少安全确认。
 - PR 前测试和 Review 记录不完整。
 - 大重构容易变成一个巨大 PR，难 Review、难回滚。
@@ -30,7 +31,7 @@
 -> Codex 实现
 -> 单测/集成/手动验证
 -> 必要时高风险复查（只审范围、边界、风险和证据）
--> Java/Security/MySQL/Quality Gate
+-> Java/Security/SQL Performance/MySQL/Quality Gate
 -> PR
 -> OpenSpec archive
 ```
@@ -183,6 +184,12 @@ PRD 已确认。请创建 OpenSpec change，并按 asana-openspec-java-workflow 
 PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-plans 辅助拆执行计划，并保持计划服务于 OpenSpec tasks。
 ```
 
+单独审查 SQL 性能时。这个提示词只做 SQL/Mapper/查询接口专项审查，不自动展开 PRD、OpenSpec、完整 Java Review 或 PR Gate：
+
+```text
+请使用本插件的 asana-openspec-java-workflow:sql-performance-review 审查这次 Mapper/SQL/列表接口改动；如果当前可用清单显示为 Asana OpenSpec Java Workflow:sql-performance-review 或只暴露短名 sql-performance-review，请按当前清单名称调用。只审 SQL/Mapper/查询接口，重点看分页、排序、N+1、索引匹配和 EXPLAIN 证据。
+```
+
 大重构：
 
 ```text
@@ -213,6 +220,7 @@ PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-
 | `java-coding-standard` | Java 编码规范 |
 | `springboot-service-patterns` | Spring Boot 服务设计 |
 | `springboot-security-review` | Spring Boot 安全评审 |
+| `asana-openspec-java-workflow:sql-performance-review` | SQL 编码规则与接口性能审查 |
 | `mysql-db-guard` | MySQL MCP / AI 账号安全规则 |
 | `java-test-strategy` | 单测、集成、手动验证策略 |
 | `java-build-fix` | Maven/Gradle 构建失败修复 |
@@ -296,6 +304,7 @@ docs/
 - 每个代码改动必须对应 PRD、OpenSpec 或 `tasks.md`。
 - 行为变更必须有测试，或说明不能自动化原因。
 - 生产问题、重大漏检、回归测试遗漏或 PR 被 revert 时，先解决当前问题，再生成复盘记录和改进追踪。
+- 涉及 Mapper/SQL、列表、搜索、统计、导出、分页或排序时，写代码必须遵循 `sql-performance-review` 编码规则，审查代码必须使用 `sql-performance-review` 审查规则，并记录索引、分页、排序、`EXPLAIN` 或低风险理由。
 - 涉及 DB 必须写影响面、SQL、回滚方案。
 - `DELETE`、`CREATE`、`ALTER` 必须确认。
 - 大重构必须先写 RFC，并拆 phase / tasks。

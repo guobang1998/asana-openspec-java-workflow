@@ -1,6 +1,6 @@
 ---
 name: java-coding-standard
-description: Use when writing or reviewing Java/Spring/MyBatis code in this workflow. Covers naming, package structure, DTO/VO/PO boundaries, immutability, Optional, streams, exceptions, logging, configuration, tests, and local formatter precedence.
+description: Use when writing or reviewing Java/Spring/MyBatis code in this workflow. Covers naming, package structure, DTO/VO/PO boundaries, immutability, Optional, streams, exceptions, logging, configuration, tests, SQL performance coding rules, and local formatter precedence.
 ---
 
 # Java Coding Standard
@@ -13,6 +13,7 @@ Java 编码规范。写代码时先用它，Review 时再用 `java-backend-revie
 2. `AGENTS.md` 和 OpenSpec。
 3. Google Java Style：格式、import、括号、命名。
 4. 阿里 Java 开发手册：异常、日志、集合、并发、SQL、安全、测试。
+5. 涉及 Mapper/SQL/查询接口时，先按 `sql-performance-review` 编码模式设计和实现 SQL。
 
 ## 命名
 
@@ -92,11 +93,15 @@ util/
 
 ## SQL / MyBatis
 
+- 设计、编写或修改 Mapper/SQL、列表、搜索、统计、导出、分页、排序时，必须先遵循 `sql-performance-review`，不是等到 Review 再补。
 - 用户输入必须参数绑定。
 - MyBatis 优先 `#{}`，禁止把用户输入拼到 `${}`。
 - 查询明确列，避免 `select *`。
 - update/delete 必须有明确 `WHERE`。
 - 分页必须有稳定排序。
+- 列表/搜索接口必须限制最大 pageSize，排序字段必须白名单。
+- Service 不在循环里按行查库造成 N+1；先考虑批量查询和 Map 回填。
+- 关键 SQL 准备 `EXPLAIN` 或目标数据库支持的等价执行计划证据。
 - 金额使用 `BigDecimal` / MySQL `decimal`。
 
 ## 测试

@@ -1,6 +1,6 @@
 ---
 name: pr-quality-gate
-description: Use before opening or merging a PR for a Java/Spring/MyBatis requirement delivered through Asana and OpenSpec. Checks build, tests, OpenSpec tasks, PR description, review readiness, risk, rollback, and documentation sync.
+description: Use before opening or merging a PR for a Java/Spring/MyBatis requirement delivered through Asana and OpenSpec. Checks build, tests, OpenSpec tasks, PR description, review readiness, API/SQL performance evidence, risk, rollback, and documentation sync.
 ---
 
 # PR Quality Gate
@@ -33,6 +33,8 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 - 关键集成测试通过，或写明无法自动化原因。
 - 验收标准逐条对应验证结果。
 - 新增/修改 SQL 有验证方式。
+- 新增/修改列表、搜索、统计、导出、分页、排序或 Mapper SQL 时，已有 `sql-performance-review` 结论。
+- 关键 SQL 已提供 `EXPLAIN` 证据，或写明低风险理由；高风险 SQL 缺少 `EXPLAIN` 不能 PASS。
 
 ### Review
 
@@ -41,6 +43,7 @@ PR 前门禁。目标：合并前把“能不能交付”说清楚。
 - 已按 `asana-openspec-java-workflow:coding-discipline` 检查修改范围和验证证据。
 - 已按 `java-coding-standard` 检查编码规范。
 - 已按 `springboot-service-patterns` 检查服务结构。
+- 涉及 Mapper/SQL、查询接口、分页排序、统计或导出时，已跑 `sql-performance-review`。
 - 涉及安全敏感点时，已跑 `springboot-security-review`。
 - 已按 `java-test-strategy` 检查测试覆盖和 PR 测试说明。
 - 涉及 MySQL 时，已跑 `mysql-db-guard`。
@@ -82,6 +85,8 @@ CodeGraph impact:
 配置差异风险:
 第三方依赖风险:
 性能风险:
+SQL 性能检查:
+EXPLAIN 证据:
 未覆盖风险:
 
 ## 上线观察
@@ -98,6 +103,8 @@ CodeGraph impact:
 是否涉及 MySQL:
 SQL 类型:
 影响行数:
+SQL 性能结论:
+索引 / EXPLAIN 证据:
 是否已确认:
 
 ## 分段审核与高风险复查
@@ -136,9 +143,13 @@ CONDITIONAL：可 PR，但需在描述里标明风险
 
 判定规则：
 
-当前为 PR Gate 软检查判定建议，不等同于自动化硬门禁；是否升级为硬阻断或自动化审计，需试运行后决定。
+本 skill 的 `BLOCKED` 是 PR 前阻断结论；是否升级为自动化审计或 CI 硬门禁，需试运行后决定。
 
 - 有 Java/Spring/MyBatis 行为变更，且项目有 `.codegraph/`，但未完成 CodeGraph impact：`BLOCKED`。
+- 涉及 Mapper/SQL、列表/搜索/统计/导出接口、分页排序或动态查询，但未完成 `sql-performance-review`：`BLOCKED`。
+- `sql-performance-review` 存在 P0/P1 未修复项：`BLOCKED`。
+- 高风险关键 SQL 缺少 `EXPLAIN`，且没有明确低风险理由：`BLOCKED`。
+- 数据库暂不可访问，但已完成静态 SQL 性能评审且只剩低风险执行计划证据缺口：最多 `CONDITIONAL`，PR 描述必须写明未验证原因和上线观察点。
 - CodeGraph 暂不可用但已手动追踪影响面、风险可控：最多 `CONDITIONAL`，PR 描述必须写明降级原因和未确认风险。
 - 有行为变更但未列出预期风险、未覆盖风险和上线观察：最多 `CONDITIONAL`，重大风险缺失时 `BLOCKED`。
 - P0/P1 生产问题、revert、重大漏检或回归测试遗漏未生成复盘计划：最多 `CONDITIONAL`；如果缺少根因和修复验证，`BLOCKED`。

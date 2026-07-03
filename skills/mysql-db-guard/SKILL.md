@@ -1,11 +1,13 @@
 ---
 name: mysql-db-guard
-description: Use when a task involves MySQL MCP access, AI database accounts, SQL execution, table/schema inspection, data writes, DELETE authorization, migration SQL, MyBatis SQL validation, EXPLAIN review, or database safety gates for Java/Spring/MyBatis work.
+description: Use when a task involves MySQL MCP access, AI database accounts, SQL execution, table/schema inspection, data writes, DELETE authorization, migration SQL, MyBatis SQL validation, EXPLAIN review, SQL performance evidence, or database safety gates for Java/Spring/MyBatis work.
 ---
 
 # MySQL DB Guard
 
 MySQL MCP / AI 专用账号安全规则。目标：让 AI 能查库、验证 SQL、必要时写测试/UAT 数据和非破坏性 DDL，但不裸奔、不误删、不执行高危 DDL。
+
+接口性能和 SQL 质量判断由 `sql-performance-review` 承担；本 skill 负责安全访问数据库、执行 `EXPLAIN` / 元数据查询、记录影响面和回滚确认。二者一起使用时，先按本 skill 保证执行安全，再把证据交给 `sql-performance-review` 判断。
 
 ## 账号原则
 
@@ -134,6 +136,16 @@ RELOAD
 - 是否需要索引。
 - `EXPLAIN` 是否有全表扫描风险。
 
+涉及接口查询性能时，还要调用 `sql-performance-review`，并提供以下证据：
+
+- 目标表和预计数据量。
+- 相关索引列表，优先用 `SHOW INDEX FROM <table>` 或 DDL。
+- 关键 SQL 的 `EXPLAIN` 输出。
+- 是否存在 `type=ALL`、`key=NULL`、扫描行数过大、`Using temporary`、`Using filesort`、`Using join buffer`、`Dependent subquery`。
+- 如果无法连接数据库，说明原因，并把 PR Gate 结论降级为 `NEED_EXPLAIN` 或 `CONDITIONAL`。
+
+`EXPLAIN` 判定不要机械化：小表/字典表可以接受全表扫描，但必须写明数据规模和增长预期；用户可见大表接口默认不能接受无解释的全表扫描。
+
 ## 输出格式
 
 ```text
@@ -141,6 +153,7 @@ RELOAD
 SQL 类型：
 目标库表：
 影响行数：
+EXPLAIN 证据：
 风险：
 回滚：
 下一步：

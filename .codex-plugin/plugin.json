@@ -1,6 +1,6 @@
 {
   "name": "asana-openspec-java-workflow",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "面向 Java/Spring/MyBatis 团队的多入口需求 + OpenSpec + Codex 交付工作流插件",
   "author": {
     "name": "10490"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Asana OpenSpec Java Workflow",
     "shortDescription": "把 Asana、用户对话、会议纪要、线上问题或技术债想法推进为 PRD、OpenSpec change、Java 实现、验证和 PR。",
-    "longDescription": "适合 Java/Spring/MyBatis 后端团队的轻量交付工具箱。它不替代 Asana、OpenSpec、Git 或 MySQL MCP，而是把多入口需求澄清、PRD、OpenSpec 变更、AI 编码纪律、Plan Review、Java 后端评审、MySQL AI 账号安全规则和 PR 前质量门禁固化成 Codex skills。",
+    "longDescription": "适合 Java/Spring/MyBatis 后端团队的轻量交付工具箱。它不替代 Asana、OpenSpec、Git 或 MySQL MCP，而是把多入口需求澄清、PRD、OpenSpec 变更、AI 编码纪律、Plan Review、Java 后端评审、SQL 性能评审、MySQL AI 账号安全规则和 PR 前质量门禁固化成 Codex skills。",
     "developerName": "10490",
     "category": "Productivity",
     "capabilities": [
@@ -17,6 +17,7 @@
       "planning",
       "code-review",
       "database",
+      "performance",
       "discipline",
       "codegraph",
       "refactor",

@@ -1,6 +1,6 @@
 ---
 name: java-backend-review
-description: Use when reviewing Java, Spring Boot, MyBatis, SQL, transaction logic, backend API changes, or PRs before merge. Focus on correctness, transaction semantics, null safety, concurrency, security, logging, and maintainable layered design.
+description: Use when reviewing Java, Spring Boot, MyBatis, SQL, transaction logic, backend API changes, or PRs before merge. Focus on correctness, transaction semantics, null safety, concurrency, security, logging, API performance, SQL quality, and maintainable layered design.
 ---
 
 # Java Backend Review
@@ -8,6 +8,8 @@ description: Use when reviewing Java, Spring Boot, MyBatis, SQL, transaction log
 面向 Java/Spring/MyBatis 后端的专项评审。先看风险，再看风格。
 
 评审前先应用 `asana-openspec-java-workflow:coding-discipline`：确认改动是否小范围、是否有需求依据、是否存在无关重构或过度设计。写法问题优先参考 `java-coding-standard`，Spring 服务结构优先参考 `springboot-service-patterns`。
+
+如果改动涉及 Mapper/SQL、列表/搜索/统计/导出接口、分页排序、动态查询条件、索引、或 Service 循环查库，必须按 `sql-performance-review` 审查模式检查 SQL。Java Review 不能用“功能可用”替代 SQL 性能结论。
 
 ## 检查清单
 
@@ -41,6 +43,17 @@ description: Use when reviewing Java, Spring Boot, MyBatis, SQL, transaction log
 - 分页是否稳定排序。
 - update/delete 是否有明确 where 条件。
 - N+1 查询是否可接受。
+
+### 接口性能与 SQL 质量
+
+- 列表、搜索、统计、导出接口是否有默认分页和最大 pageSize。
+- 分页是否有稳定排序，排序字段是否白名单控制。
+- Service 是否在循环中调用 Mapper / Repository 造成 N+1。
+- 列表接口是否只查必要列，避免正文、JSON、图片、大 text/blob。
+- 关键 SQL 是否有 `EXPLAIN` 证据，或明确低风险理由。
+- 大表查询是否命中预期索引，联合索引顺序是否匹配过滤和排序。
+- `COUNT(*)`、`GROUP BY`、`ORDER BY`、多表 join 是否存在慢查询风险。
+- 是否用缓存掩盖慢 SQL 根因；缓存只能作为收益明确的补充方案。
 
 ### Null Safety
 
@@ -102,6 +115,7 @@ P3 低风险：可后续
 
 - CodeGraph 索引状态确认。
 - CodeGraph impact 影响面证据，或明确降级原因。
+- `sql-performance-review` 结论；不涉及 SQL/查询接口时说明原因。
 - 测试命令和结果。
 - 未覆盖风险。
 - 回滚方案。
