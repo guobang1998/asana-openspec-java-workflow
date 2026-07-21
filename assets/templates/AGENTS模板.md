@@ -4,9 +4,12 @@
 
 ## 需求入口规则
 
+<!-- route-priority: setup > wayfinder > brainstorming -->
+
 - 需求入口不限于 Asana，也可以来自用户对话、会议纪要、线上问题、技术债或新功能探索。
 - Asana 是需求跟踪系统，不是唯一入口。
-- 模糊需求、新功能探索、方案分歧必须先澄清；范围不清、方案分歧较大、用户体验/业务口径不清或可能重构时，必须使用 `superpowers:brainstorming`。
+- 入口优先级：`setup-workflow > wayfinder-workflow > superpowers:brainstorming`。Java 仓库缺少 `docs/agents/代码规范地图.md` 时，先 `setup-workflow` 只读发现；跨会话、路径不清、存在多个决策或阻塞关系的大目标，先 `wayfinder-workflow` 只画 map。
+- 未命中 setup 或 Wayfinder 时，模糊需求先澄清；范围不清、方案分歧较大、用户体验/业务口径不清或可能重构时，才使用 `superpowers:brainstorming`。
 - 轻量澄清是 `prd-writer` / delivery 内的最小澄清模式，只适用于小范围、低风险、目标基本可判断的模糊需求。
 - brainstorming 产物只作为 PRD 输入，不直接替代 PRD / OpenSpec。
 - 没有 Asana 可以启动需求澄清；没有确认 PRD / OpenSpec 不允许进入行为变更实现。
@@ -37,11 +40,44 @@
 - 高风险复查只审范围、边界、风险和证据，不接手实现。
 - 重复出现 2 次及以上的阻断项、建议项、输入材料不足或验证证据不足，应评估升级为 PR Gate、checklist、AGENTS、skill 或问题地图。
 
+## 模块设计与接口权威边界
+
+当需求涉及新模块、原型图转设计、核心表、DDL、DTO、前端接口文档、Apifox/OpenAPI、OpenSpec 或 PRD 字段口径时，先做模块设计与接口权威边界检查，不要直接从页面字段生成表，也不要把数据库字段原样搬进前端请求 DTO。
+
+### 模块设计基础
+
+- 设计顺序：边界与非目标 -> 核心实体/生命周期/角色/跨域边界 -> 未来变异点矩阵 -> 核心事实源/可信 ID -> 薄核心表 -> 扩展缝 -> DDL/技术设计/前端接口/PRD/OpenSpec -> 旧口径残留扫描。
+- 核心表只放长期稳定字段；高变化内容优先放 extension/detail/child/workflow/event/snapshot/association 表。
+- 普通字段不带表名前缀，例如 `title`、`status`、`price`；外键/跨域引用使用 `product_id`、`bundle_id`、`shop_id` 这类实体语义；同表多个同类角色时才用 `creator_user_id`、`operator_user_id`。
+- 历史事实用 snapshot/event/ledger 保存，不能依赖当前主表反推。
+- 如果一张表出现大量 subtype nullable 字段、不同生命周期字段、未来每个功能都要加 5~10 个字段，先停下来复盘，不要继续堆字段。
+
+### 接口权威边界
+
+核心原则：**前端负责表达用户意图，后端负责确认业务事实。**
+
+请求字段只允许包含：
+- 用户真实输入 / 选择 / 上传 / 排序的值。
+- 后端无法从登录态、租户/店铺上下文、path/header、数据库关系、业务规则中可靠推导的值。
+
+请求体默认禁止包含：
+- 当前用户、创建人、更新人、审核人。
+- 可由 auth/path/header/上下文推导的 `userId`、`shopId`、`tenantId`、`targetUserId`、`targetShopId`。
+- 审核状态、发布状态、派生状态、权限判断结果。
+- `canEdit`、`canDelete`、`canPublish` 等只读权限字段。
+- 计算金额、库存状态、低库存状态、可售状态等后端判断结果。
+- `deleted`、内部版本、signature/cache/snapshot、软删除唯一性辅助字段。
+
+接口文档必须包含字段来源表：字段、位置、前端是否传、来源/责任方、生命周期、说明。
+字段生命周期至少区分：`active`、`readonly`、`derived`、`forbidden`、`deprecated`、`internal`、`defensive-only`。
+
+实现或审查前必须做跨层字段对齐：DDL / Model / Request DTO / Response VO / Apifox 或 OpenAPI / Mapper SQL / Service 校验 / Tests / PRD / OpenSpec / 前端文档。
+
 ## Superpowers 辅助规则
 
 - Superpowers 是辅助技能，不替代需求入口记录 / PRD / OpenSpec / CodeGraph / 测试 / PR Gate 主流程。
 - 小范围、低风险、目标基本可判断的模糊需求，可以先做轻量澄清。
-- 新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清或可能重构时，必须调用 `superpowers:brainstorming` 澄清目标、范围、候选方案和待确认问题。
+- 已完成 setup 且未命中 Wayfinder 时，新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清或可能重构时，必须调用 `superpowers:brainstorming` 澄清目标、范围、候选方案和待确认问题。
 - `superpowers:brainstorming` 的输出只作为 PRD 输入；不能绕过 `prd-writer`，也不能直接进入实现。
 - PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可调用 `superpowers:writing-plans` 拆执行计划。
 - `superpowers:writing-plans` 的输出只作为 OpenSpec `tasks.md` 和实现计划补充；不能替代已确认 PRD / OpenSpec。

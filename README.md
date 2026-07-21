@@ -19,9 +19,11 @@
 ```text
 需求入口（Asana / 用户对话 / 会议纪要 / 线上问题 / 技术债）
 -> 入口路由判断
+-> 缺规范地图：setup-workflow 只读发现
+-> 跨会话大目标且路径不清：wayfinder-workflow 只画 map
 -> 明确需求：PRD md
 -> 模糊需求：轻量澄清 / 按条件进入 superpowers:brainstorming
--> 新功能探索 / 方案分歧：superpowers:brainstorming
+-> 新功能探索 / 方案分歧（未命中 Wayfinder）：superpowers:brainstorming
 -> PRD 确认
 -> OpenSpec 既有规格 / active changes 检查
 -> OpenSpec change
@@ -36,10 +38,14 @@
 -> OpenSpec archive
 ```
 
+<!-- route-branch: brainstorming-after-wayfinder -->
+
 核心结论：
 
 - Asana 是需求跟踪入口之一，不是唯一入口。
-- 模糊需求必须先 brainstorming；轻量澄清或正式 `superpowers:brainstorming` 的输出只作为 PRD 输入。
+- 入口优先级：`setup-workflow > wayfinder-workflow > superpowers:brainstorming`。跨会话大目标先找路，单会话的具体问题再澄清。
+<!-- route-priority: setup > wayfinder > brainstorming -->
+- 轻量澄清或正式 `superpowers:brainstorming` 的输出只作为 PRD 输入，不替代 Wayfinder、PRD 或 OpenSpec。
 - 没有 Asana 可以启动需求澄清和 PRD 草稿；没有确认 PRD / OpenSpec 不进入行为变更实现。
 
 反馈闭环走补充流程，不替代主交付流程：
@@ -58,6 +64,7 @@
 
 ```text
 重构入口（Asana Epic / 技术债 / 架构治理）
+-> Destination / 范围 / 首批决策不清：Wayfinder map
 -> CodeGraph Discovery
 -> 重构 RFC
 -> 测试基线
@@ -76,8 +83,12 @@
 Superpowers 只作为辅助节点，不替代主交付流程：
 
 ```text
-需求模糊 / 新功能探索
--> 必须先澄清目标、范围和方案
+跨会话大目标且路径不清
+-> 先 Wayfinder 画 map，一次只解决一个 ticket
+-> ticket 需要用户取舍时再调用 superpowers:brainstorming
+
+未命中 Wayfinder 的需求模糊 / 新功能探索
+-> 先澄清目标、范围和方案
 -> 小范围低风险可做轻量澄清；范围不清、方案分歧、新功能探索必须调用 superpowers:brainstorming
 -> 输出作为 PRD 输入
 
@@ -98,6 +109,13 @@ git clone <repo-url> "$env:USERPROFILE\plugins\asana-openspec-java-workflow"
 codex plugin add asana-openspec-java-workflow@personal
 ```
 
+若 WindowsApps 版 `codex.exe` 提示 `Access is denied`，使用：
+
+```powershell
+& "$env:USERPROFILE\.codex\npm-global\codex.cmd" plugin add asana-openspec-java-workflow@personal
+& "$env:USERPROFILE\.codex\npm-global\codex.cmd" plugin list
+```
+
 macOS / Linux：
 
 ```bash
@@ -113,10 +131,11 @@ codex plugin add asana-openspec-java-workflow@personal
 每个 Java 项目需要：
 
 1. 把 [AGENTS模板.md](assets/templates/AGENTS模板.md) 合并到项目根目录 `AGENTS.md`
-2. 安装并初始化 OpenSpec
-3. 可选初始化 CodeGraph
-4. 可选配置 Asana / GitHub Connector
-5. 可选配置 MySQL MCP 和 `ai_agent`
+2. 使用 `setup-workflow` 做只读发现；确认后创建 `docs/agents/代码规范地图.md`
+3. 安装并初始化 OpenSpec
+4. 可选初始化 CodeGraph
+5. 可选配置 Asana / GitHub Connector
+6. 可选配置 MySQL MCP 和 `ai_agent`
 
 OpenSpec：
 
@@ -151,7 +170,13 @@ openspec update
 在 Codex 里说：
 
 ```text
-请按 asana-openspec-java-workflow 多入口需求路由处理这个需求。它可能来自 Asana、用户对话、会议纪要、线上问题或技术债想法；如果需求模糊，先澄清，不要写代码。
+请按 asana-openspec-java-workflow 自动处理这个目标：先加载仓库代码规范地图；缺失时先只读 setup。若目标跨会话且路径不清，先创建 Wayfinder map；否则按 PRD、OpenSpec 和 Java 后端交付流程推进。不要直接写代码。
+```
+
+首次接入或需要按现有仓库规范工作时：
+
+```text
+请使用 asana-openspec-java-workflow:setup-workflow 检查这个 Java 仓库的 AGENTS、构建、测试、CI、OpenSpec、CodeGraph 和分层约定；先只读输出代码规范地图的写入计划，等我确认后再写文件。
 ```
 
 先生成 PRD：
@@ -175,7 +200,25 @@ PRD 已确认。请创建 OpenSpec change，并按 asana-openspec-java-workflow 
 需求模糊或新功能探索时：
 
 ```text
-这个需求还不清楚。请先用 superpowers:brainstorming 辅助澄清目标、范围和候选方案，产物只作为 PRD 输入，不直接进入实现。
+这个需求还不清楚。请先按入口优先级判断是否需要 setup 或 Wayfinder；未命中时再用 superpowers:brainstorming 澄清目标、范围和候选方案，产物只作为 PRD 输入，不直接进入实现。
+```
+
+跨会话、路径不清的大目标：
+
+<!-- wayfinder-user-experience: guided-confirmation -->
+
+Wayfinder 会先锁定 Destination，再一次只推进一张 frontier ticket。遇到需要人取舍的 HITL 票时，它每轮只问一个问题，给出 2 至 3 个互斥选项、推荐和理由；只有你明确确认后，才关闭票据并把决定写回地图。AFK 调研可以独立进行，但调研后仍需取舍时会先转成 HITL 决策票。
+
+画图后若存在多张当前可执行的 research 票，支持后台子代理的运行环境会原子认领并并行研究，再由协调器串行写入带一手来源的资产，并把链接写回 ticket；不支持后台子代理时保持票据未认领并停止，不伪装成已经研究。Frontier 漏掉可执行票会直接失败；全部票据关闭且 fog 清空后，map 生成 `交接.md` 并进入 `ready_for_handoff`。地图和对话始终显示票据名称，ID 只用于文件和机器状态。
+
+```text
+请使用 asana-openspec-java-workflow:wayfinder-workflow 处理这个目标。先逐题帮我确认 Destination；每题给 2 至 3 个选项和你的推荐，等我明确确认后再建本地 Markdown map。这次只画图，不执行任何 ticket。
+```
+
+继续已有 map 时可以直接说：
+
+```text
+请继续这个 Wayfinder map，一次只处理一张 frontier ticket。需要我取舍时，请只问一个问题，给出选项和推荐；未收到我的明确确认，不要关闭票据或更新地图 Decisions。
 ```
 
 实现复杂或多文件多步骤时：
@@ -213,6 +256,8 @@ PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-
 | Skill | 用途 |
 |---|---|
 | `prd-writer` | 多入口需求转 PRD |
+| `setup-workflow` | 发现仓库规则并生成代码规范地图写入计划 |
+| `wayfinder-workflow` | 为跨会话大目标创建本地 map、frontier ticket 和阻塞关系 |
 | `asana-openspec-java-workflow:asana-openspec-delivery` | 主交付流程 |
 | `large-refactor-workflow` | 大重构升级流程 |
 | `codegraph-context-guard` | 代码图谱定位和影响面复查 |
@@ -231,9 +276,10 @@ PRD 和 OpenSpec 已确认。这个实现较复杂，请用 superpowers:writing-
 
 Superpowers 是辅助技能，不是本 workflow 的主流程。
 
-- 模糊需求、新功能探索、方案分歧较大时，brainstorming 是一等入口；输出只作为 PRD 输入。
+- Wayfinder 命中时优先于 brainstorming：`setup-workflow > wayfinder-workflow > superpowers:brainstorming`。Wayfinder 只找路；ticket 需要人做取舍时再进入 brainstorming。
+- 未命中 Wayfinder 时，模糊需求、新功能探索、方案分歧较大时，brainstorming 是一等入口；输出只作为 PRD 输入。
 - 轻量澄清适用于小范围、低风险、目标基本可判断的模糊需求，只输出目标、范围、不做什么、待确认问题，并进入 PRD 草稿。
-- 正式 `superpowers:brainstorming` 适用于新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清、可能演化成重构的需求。
+- 正式 `superpowers:brainstorming` 适用于未命中 Wayfinder 的新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清、可能演化成重构的需求。
 - 轻量澄清和正式 `superpowers:brainstorming` 都不能直接进入实现。
 - PRD / OpenSpec 已确认，且实现涉及多文件、多步骤、复杂测试或回滚策略时，可使用 `superpowers:writing-plans`；输出只作为 OpenSpec `tasks.md` 和实现计划补充。
 - 紧急止血、明确 bugfix、小范围配置或文档调整，不强制使用 `superpowers:brainstorming`。
@@ -250,6 +296,9 @@ skills/
 
 assets/templates/
   AGENTS模板.md
+  代码规范地图模板.md
+  wayfinding-map模板.md
+  frontier-ticket模板.md
   PRD模板.md
   Asana字段模板.md
   Claude代码审查任务单.md

@@ -7,6 +7,16 @@ description: Use when converting an Asana requirement, product request, support 
 
 把 Asana 任务、用户对话、会议纪要、线上问题、技术债想法或 brainstorming 结果整理成可评审、可实现、可验收的 PRD。默认中文；保留 Java identifiers、API 名、SQL、配置 key 原文。
 
+## 入口路由
+
+优先级：`setup-workflow > wayfinder-workflow > superpowers:brainstorming`。
+
+<!-- route-priority: setup > wayfinder > brainstorming -->
+
+- 目标仓库缺少 `docs/agents/代码规范地图.md` 时，先由 `setup-workflow` 做只读发现；不要猜测构建、测试或 CI 命令。
+- 目标跨多个会话、存在多个相互依赖决策，或无法描述从当前状态到 Destination 的路径时，先由 `wayfinder-workflow` 画 map；本次不直接生成正式 PRD。
+- 只有未命中前两项时，才按本 skill 的轻量澄清或 `superpowers:brainstorming` 规则处理。
+
 ## 输入
 
 PRD 输入可以来自：
@@ -65,7 +75,7 @@ PRD 输入可以来自：
 
 1. 需求不清楚时先列 `待确认问题`，不要直接写实现方案。
 2. 轻量澄清可以由 `prd-writer` 在 PRD 草稿前完成，但只适用于小范围、低风险、目标基本可判断的需求。
-3. 需求涉及新功能探索、方案分歧、范围不清、用户体验/业务口径或可能重构时，必须先进入正式 `superpowers:brainstorming`。
+3. 未命中 setup 或 Wayfinder，且需求涉及新功能探索、方案分歧、范围不清、用户体验/业务口径或可能重构时，必须先进入正式 `superpowers:brainstorming`。
 4. 如果输入来自 brainstorming，PRD 必须吸收目标、背景、范围、不做什么、推荐方案和待确认问题；未确认问题不能写成已确认需求。
 5. `superpowers:brainstorming` 的输出只作为 PRD 输入，不替代 PRD / OpenSpec，也不能直接进入实现。
 6. 验收标准必须可测试，避免“体验更好”“性能优化”这类空话。

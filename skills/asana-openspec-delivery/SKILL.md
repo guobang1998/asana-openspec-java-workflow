@@ -1,6 +1,6 @@
 ---
 name: asana-openspec-delivery
-description: "Use when driving a Java/Spring/MyBatis requirement from intake through PRD, OpenSpec, CodeGraph impact, implementation, verification, review, PR, and archive. Intake can come from Asana, user conversation, meeting notes, incidents, technical debt, or rough ideas; unclear requirements must go through brainstorming before PRD/OpenSpec."
+description: "Use when driving a Java/Spring/MyBatis requirement from intake through PRD, OpenSpec, CodeGraph impact, implementation, verification, review, PR, and archive. Intake can come from Asana, user conversation, meeting notes, incidents, technical debt, rough ideas, or cross-session goals with unclear routes."
 ---
 
 # Asana OpenSpec Delivery
@@ -11,20 +11,26 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 
 先判断需求来源和清晰度：
 
+优先级：`setup-workflow > wayfinder-workflow > superpowers:brainstorming`。先补仓库事实，再为跨会话大目标找路；只有未命中前两项时，才按问题粒度进入 brainstorming。
+
+<!-- route-priority: setup > wayfinder > brainstorming -->
+
 | 输入 | 处理 |
 |---|---|
+| 新接入仓库，或缺少 `docs/agents/代码规范地图.md` | 先调用 `setup-workflow` 做只读发现；需要写入地图时等待用户确认 |
+| 跨会话的大而模糊目标，或多个决策和依赖尚不清晰 | 已完成 setup 前置后调用 `wayfinder-workflow` 画 map；每张 ticket 再按需要澄清、写 PRD 或进入 OpenSpec |
 | 明确 Asana 需求 | 读取 Asana，生成或完善 PRD |
 | 用户对话中的明确需求 | 生成 PRD 草稿，标记 `需求来源：用户对话` |
-| 模糊需求 | 进入轻量澄清或 `superpowers:brainstorming`，不写代码 |
+| 单会话、小范围且目标基本可判断的模糊需求 | 进入轻量澄清或 `superpowers:brainstorming`，不写代码 |
 | 会议纪要 | 生成 PRD 草稿，列待确认问题 |
-| 技术债 / 重构想法 | 先 brainstorming / Discovery，必要时进入 RFC |
+| 技术债 / 重构想法 | Destination、范围或首批决策不清时先 Wayfinder；清楚后再 Discovery / RFC |
 | 线上问题 | 先定位根因，等待用户确认处理模式 |
 
 没有 Asana 不阻塞需求澄清；没有确认 PRD / OpenSpec 不进入实现。
 
 轻量澄清是 delivery / prd-writer 内的最小澄清模式，只适用于小范围、低风险、目标基本可判断的模糊需求。
 
-命中以下任一条件时，必须进入正式 `superpowers:brainstorming`：
+未命中 setup 或 Wayfinder 条件时，命中以下任一条件必须进入正式 `superpowers:brainstorming`：
 
 - 新功能探索。
 - 方案分歧较大。
@@ -37,6 +43,7 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 ```text
 需求入口
 -> 入口路由判断
+-> 跨会话大目标：Wayfinder map -> 一次解决一个 ticket
 -> 轻量澄清 / 按条件进入 Superpowers brainstorming
 -> PRD Writer
 -> PRD Review
@@ -57,12 +64,17 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 ## 执行流程
 
 1. 判断需求来源和清晰度，记录 `需求来源`、`是否已有 Asana`、`跟踪要求`：
+   - 先检查 `docs/agents/代码规范地图.md`；存在时加载为仓库规范索引，不存在时调用 `setup-workflow` 做只读发现。
+   - 同时命中“缺代码规范地图”和“跨会话大目标”时，setup-workflow 的只读发现优先于 Wayfinder；发现结束后可继续画 map，但 Notes 必须标记“代码规范地图待确认”。
+   - setup 尚未得到写入确认时，不阻塞本次需求澄清，但必须标记“代码规范地图待确认”，且不得猜测构建、测试或 CI 命令。
    - 有 Asana：读取标题、背景、目标、验收人、优先级、影响面。
    - 无 Asana：读取用户对话、会议纪要、线上问题描述、技术债想法或 brainstorming 结果。
    - 需要团队协作、排期或跨团队跟踪时，标记待补 Asana。
-2. 需求模糊、新功能探索或方案分歧较大时，先澄清，不写代码：
-   - 小范围、低风险、目标基本可判断时，可做轻量澄清，输出目标、范围、不做什么和待确认问题。
-   - 新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清或可能重构时，必须调用 `superpowers:brainstorming`。
+2. 需求模糊、新功能探索或方案分歧较大时，先按优先级澄清，不写代码：
+   - 目标跨多个会话、存在多项相互依赖决策、或无法描述从当前状态到 Destination 的路径时，先调用 `wayfinder-workflow`。本阶段只画 map；后续一次只解决一个 ticket。
+    - Wayfinder ticket 需要用户澄清时，再按条件调用 `superpowers:brainstorming`；决策清晰后才进入 PRD/OpenSpec。
+    - 未命中 Wayfinder 时，小范围、低风险、目标基本可判断可做轻量澄清，输出目标、范围、不做什么和待确认问题。
+    - 未命中 Wayfinder 且新功能探索、方案分歧较大、用户体验/业务口径不清、范围不清或可能重构时，必须调用 `superpowers:brainstorming`。
    - brainstorming 输出只作为 PRD 输入，不替代 `prd-writer`。
    - 明确 bugfix、紧急止血、小范围配置或文档调整可跳过正式 brainstorming，但仍要进入 PRD / OpenSpec 门槛。
 3. 总是先调用 `prd-writer`：
@@ -143,6 +155,8 @@ description: "Use when driving a Java/Spring/MyBatis requirement from intake thr
 ## 决策规则
 
 - Asana 是需求跟踪入口之一，不承载完整实现细节，也不是唯一入口。
+- 代码规范地图是仓库事实的轻量索引；`AGENTS.md`、CI、PRD 和 OpenSpec 仍有更高权威。
+- Wayfinder 是跨会话目标的找路层；map 不替代 PRD，frontier ticket 不替代 OpenSpec `tasks.md`，并且默认不直接实现目标。
 - PRD 是业务合同，OpenSpec 是变更账本。
 - Superpowers 是辅助技能，只按条件触发，不接管主流程。
 - `superpowers:brainstorming` 只用于需求澄清，输出进入 PRD。

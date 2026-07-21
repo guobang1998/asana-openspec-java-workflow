@@ -1,15 +1,15 @@
 {
   "name": "asana-openspec-java-workflow",
-  "version": "1.3.3",
-  "description": "面向 Java/Spring/MyBatis 团队的多入口需求 + OpenSpec + Codex 交付工作流插件",
+  "version": "1.8.0+codex.202607201647",
+  "description": "\u9762\u5411 Java/Spring/MyBatis \u56e2\u961f\u7684\u591a\u5165\u53e3\u9700\u6c42 + OpenSpec + Codex \u4ea4\u4ed8\u5de5\u4f5c\u6d41\u63d2\u4ef6",
   "author": {
     "name": "10490"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Asana OpenSpec Java Workflow",
-    "shortDescription": "把 Asana、用户对话、会议纪要、线上问题或技术债想法推进为 PRD、OpenSpec change、Java 实现、验证和 PR。",
-    "longDescription": "适合 Java/Spring/MyBatis 后端团队的轻量交付工具箱。它不替代 Asana、OpenSpec、Git 或 MySQL MCP，而是把多入口需求澄清、PRD、OpenSpec 变更、AI 编码纪律、Plan Review、Java 后端评审、SQL 性能评审、MySQL AI 账号安全规则和 PR 前质量门禁固化成 Codex skills。",
+    "shortDescription": "\u628a Asana\u3001\u7528\u6237\u5bf9\u8bdd\u3001\u4f1a\u8bae\u7eaa\u8981\u3001\u7ebf\u4e0a\u95ee\u9898\u6216\u6280\u672f\u503a\u60f3\u6cd5\u63a8\u8fdb\u4e3a PRD\u3001OpenSpec change\u3001Java \u5b9e\u73b0\u3001\u9a8c\u8bc1\u548c PR\u3002",
+    "longDescription": "\u9002\u5408 Java/Spring/MyBatis \u540e\u7aef\u56e2\u961f\u7684\u8f7b\u91cf\u4ea4\u4ed8\u5de5\u5177\u7bb1\u3002\u5b83\u4e0d\u66ff\u4ee3 Asana\u3001OpenSpec\u3001Git \u6216 MySQL MCP\uff0c\u800c\u662f\u628a\u591a\u5165\u53e3\u9700\u6c42\u6f84\u6e05\u3001PRD\u3001OpenSpec \u53d8\u66f4\u3001AI \u7f16\u7801\u7eaa\u5f8b\u3001Plan Review\u3001Java \u540e\u7aef\u8bc4\u5ba1\u3001SQL \u6027\u80fd\u8bc4\u5ba1\u3001MySQL AI \u8d26\u53f7\u5b89\u5168\u89c4\u5219\u548c PR \u524d\u8d28\u91cf\u95e8\u7981\u56fa\u5316\u6210 Codex skills\u3002",
     "developerName": "10490",
     "category": "Productivity",
     "capabilities": [
@@ -24,8 +24,11 @@
       "security",
       "build",
       "testing",
-      "quality"
+      "quality",
+      "setup",
+      "standards",
+      "wayfinding"
     ],
-    "defaultPrompt": "按多入口需求 + OpenSpec + Java 后端交付流程推进这个需求。"
+    "defaultPrompt": "处理这个目标：先加载仓库代码规范地图；缺失时先只读 setup-workflow。若目标跨会话且路径不清，先创建 wayfinder-workflow map；否则按 PRD、OpenSpec 和 Java 后端交付流程推进。"
   }
 }

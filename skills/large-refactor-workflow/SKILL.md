@@ -1,11 +1,17 @@
 ---
 name: large-refactor-workflow
-description: Use when a request is a large refactor, architecture change, module rewrite, cross-module migration, technical debt cleanup, framework upgrade, API compatibility migration, or any change too large for a single OpenSpec change. Forces Discovery, RFC, characterization tests, phased OpenSpec changes, small PRs, compatibility, rollback, and cleanup.
+description: Use when a large refactor, architecture change, module rewrite, cross-module migration, technical debt cleanup, framework upgrade, or API compatibility migration has a clear destination, scope, and first-phase decisions.
 ---
 
 # Large Refactor Workflow
 
 大重构工作流。目标：把“大而乱”的重构拆成可评审、可测试、可回滚的小阶段。
+
+## Wayfinder 前置
+
+Destination、范围和首批决策尚不清晰时，不进入大重构流程。先调用 `wayfinder-workflow` 画 map，逐票澄清目标、边界、依赖和首批可执行阶段；地图清晰后再判断是否属于大重构。
+
+“治理某模块”“统一一下架构”“参考现有流程优化”这类大而模糊的输入，不得直接创建 Discovery、RFC、OpenSpec change 或多 agent 分工。
 
 ## 触发条件
 

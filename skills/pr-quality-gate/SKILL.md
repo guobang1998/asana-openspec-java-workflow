@@ -5,6 +5,26 @@ description: Use before opening or merging a PR for a Java/Spring/MyBatis requir
 
 # PR Quality Gate
 
+## 四轴汇总
+
+最终输出必须在 `PASS`、`BLOCKED` 或 `CONDITIONAL` 前按四轴汇总；四轴只负责呈现和定位，不能降低本 skill 已有任何阻断条件。
+
+```text
+## Standards
+本地规范、分层、接口字段权威和可维护性结论。
+
+## Spec
+PRD、OpenSpec、tasks.md 与实际改动的对应关系和偏差。
+
+## Tests
+构建、单测、集成测试、手动验证、未覆盖项和验收证据。
+
+## Risk Gates
+CodeGraph、事务、SQL/EXPLAIN、MySQL、权限、安全、性能、回滚和上线观察。
+```
+
+Standards 必须按仓库 `AGENTS.md`、代码规范地图和 `java-backend-review` 检查请求字段权威；PR Gate 只汇总结论和缺口，不复制字段规则正文。
+
 PR 前门禁。目标：合并前把“能不能交付”说清楚。
 
 ## 必查项
